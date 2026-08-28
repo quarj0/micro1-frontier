@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.IntegrationListView.get"]
+accepted_values = ["true", "false"]
+

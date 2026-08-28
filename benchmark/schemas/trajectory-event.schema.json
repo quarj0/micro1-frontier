@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ari/trajectory-event.schema.json",
+  "title": "ARI trajectory event",
+  "type": "object",
+  "required": ["type", "message"],
+  "properties": {
+    "type": {"type": "string", "minLength": 1},
+    "message": {"type": "string", "minLength": 1},
+    "command": {"type": "string"},
+    "evidence": {"type": ["string", "object", "array"]}
+  },
+  "additionalProperties": true
+}
+

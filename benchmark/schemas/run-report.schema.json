@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/ari/run-report.schema.json",
+  "title": "ARI benchmark run report",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "case_id",
+    "mode",
+    "agent",
+    "evaluator",
+    "patch",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "run_id": {"type": "string"},
+    "case_id": {"type": "string"},
+    "mode": {"enum": ["docker", "subprocess"]},
+    "patch": {"type": "string"},
+    "patch_files": {"type": "array", "items": {"type": "string"}},
+    "trajectory_events": {"type": "integer", "minimum": 0},
+    "trajectory_error": {"type": ["string", "null"]},
+    "agent": {"$ref": "#/$defs/process"},
+    "evaluator": {"$ref": "#/$defs/process"},
+    "metrics": {"type": "object"}
+  },
+  "$defs": {
+    "process": {
+      "type": "object",
+      "required": ["state", "command", "exit_code", "runtime_seconds", "stdout", "stderr"],
+      "properties": {
+        "state": {"enum": ["succeeded", "failed", "timed_out", "launch_error"]},
+        "command": {"type": "array", "items": {"type": "string"}},
+        "exit_code": {"type": ["integer", "null"]},
+        "runtime_seconds": {"type": "number", "minimum": 0},
+        "stdout": {"type": "string"},
+        "stderr": {"type": "string"},
+        "error": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

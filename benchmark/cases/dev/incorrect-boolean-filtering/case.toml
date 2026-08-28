@@ -1,0 +1,7 @@
+id = "incorrect-boolean-filtering"
+title = "Incorrect boolean query filtering"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60
+

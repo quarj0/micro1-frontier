@@ -1,0 +1,7 @@
+id = "nested-write-atomicity"
+title = "Nested-write atomicity failure"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60
+

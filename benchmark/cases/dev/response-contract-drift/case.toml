@@ -1,0 +1,7 @@
+id = "response-contract-drift"
+title = "Response contract drift"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60
+

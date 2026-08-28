@@ -1,0 +1,30 @@
+[project]
+name = "regression-investigator"
+version = "0.1.0"
+description = "Evidence-backed benchmark harness for Django/DRF API regression repair agents"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "Django==5.2.5",
+  "djangorestframework==3.16.1",
+]
+
+[project.scripts]
+ari = "regression_investigator.cli:main"
+
+[dependency-groups]
+dev = [
+  "pytest==8.4.1",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/regression_investigator"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+

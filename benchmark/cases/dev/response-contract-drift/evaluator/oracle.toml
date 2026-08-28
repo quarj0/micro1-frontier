@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.serializers.ProfileSerializer"]
+forbidden_response_fields = ["name", "internal_note"]
+
