@@ -6,7 +6,7 @@ def test_metrics_require_the_evaluator_to_pass():
     agent = ProcessResult(ProcessState.SUCCEEDED, ["agent"], 0, 1.0, "", "")
     evaluator = EvaluationResult(ProcessState.FAILED, ["test"], 1, 0.5, "", "", passed=False)
 
-    metrics = calculate_metrics(agent, evaluator, ["api/views.py"], [])
+    metrics = calculate_metrics(agent, evaluator, ["api/views.py"], [], None)
 
     assert metrics["agent_completed"] is True
     assert metrics["verified_repair"] is False

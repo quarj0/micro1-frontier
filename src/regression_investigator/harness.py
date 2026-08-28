@@ -62,7 +62,7 @@ def _run_git(workspace: Path, *arguments: str) -> str:
 
 def _prepare_workspace(
     case_dir: Path, destination: Path, prompt_template: Path
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, str]:
     workspace = destination / "workspace"
     shutil.copytree(case_dir / "input" / "repo", workspace)
     issue_text = (case_dir / "input" / "issue.md").read_text(encoding="utf-8")
@@ -79,7 +79,8 @@ def _prepare_workspace(
     _run_git(workspace, "config", "user.email", "ari-harness@example.invalid")
     _run_git(workspace, "add", "--all")
     _run_git(workspace, "commit", "--quiet", "-m", "broken benchmark input")
-    return workspace, prompt_path
+    baseline_revision = _run_git(workspace, "rev-parse", "HEAD").strip()
+    return workspace, prompt_path, baseline_revision
 
 
 def _load_trajectory(path: Path) -> tuple[list[dict[str, object]], str | None]:
@@ -101,6 +102,18 @@ def _load_trajectory(path: Path) -> tuple[list[dict[str, object]], str | None]:
     return events, None
 
 
+def _load_json_object(path: Path) -> tuple[dict[str, object] | None, str | None]:
+    if not path.exists():
+        return None, None
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return None, f"invalid JSON: {exc.msg}"
+    if not isinstance(value, dict):
+        return None, "value is not a JSON object"
+    return value, None
+
+
 def run_case(
     *,
     root: Path,
@@ -110,6 +123,7 @@ def run_case(
     timeout_seconds: int,
     docker_image: str | None,
     allow_network: bool = False,
+    secret_environment: tuple[str, ...] = (),
     keep_workspace: bool = False,
 ) -> RunReport:
     cases = discover_cases(root)
@@ -124,7 +138,7 @@ def run_case(
     temp_context = tempfile.TemporaryDirectory(prefix=f"ari-{case_id}-")
     temp_path = Path(temp_context.name)
     try:
-        workspace, prompt_path = _prepare_workspace(
+        workspace, prompt_path, baseline_revision = _prepare_workspace(
             case_dir,
             temp_path,
             root / "prompts" / "baseline.md",
@@ -140,12 +154,22 @@ def run_case(
                 mode=mode,
                 docker_image=docker_image,
                 allow_network=allow_network,
+                secret_environment=secret_environment,
             )
         )
 
-        patch = _run_git(workspace, "diff", "--binary", "HEAD")
-        changed = _run_git(workspace, "diff", "--name-only", "HEAD").splitlines()
+        patch = _run_git(workspace, "diff", "--binary", baseline_revision)
+        changed = _run_git(
+            workspace, "diff", "--name-only", baseline_revision
+        ).splitlines()
         trajectory, trajectory_error = _load_trajectory(trajectory_path)
+        usage, usage_error = _load_json_object(workspace / ".ari" / "usage.json")
+        final_response_path = workspace / ".ari" / "final-response.md"
+        final_response = (
+            final_response_path.read_text(encoding="utf-8")
+            if final_response_path.exists()
+            else None
+        )
         if trajectory_path.exists():
             shutil.copy2(trajectory_path, root / "trajectories" / f"{run_id}.jsonl")
 
@@ -158,7 +182,7 @@ def run_case(
             list(evaluator_config["command"]),
             int(evaluator_config.get("timeout_seconds", 60)),
         )
-        metrics = calculate_metrics(agent, evaluator, changed, trajectory)
+        metrics = calculate_metrics(agent, evaluator, changed, trajectory, usage)
         report = RunReport(
             schema_version="1.0",
             run_id=run_id,
@@ -171,6 +195,9 @@ def run_case(
             patch_files=changed,
             trajectory_events=len(trajectory),
             trajectory_error=trajectory_error,
+            usage=usage,
+            usage_error=usage_error,
+            final_response=final_response,
             metrics=metrics,
         )
         write_report(report, run_root)

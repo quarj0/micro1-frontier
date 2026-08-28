@@ -49,3 +49,20 @@ Build or select an image containing the agent command and all dependencies it ne
 Each agent-facing repository includes a pinned uv environment. For a network-disabled official run, bake those locked packages into the agent image or its uv cache before starting the timed container; the harness never enables an implicit image pull or dependency download.
 
 Do not mount credentials, evaluator directories, the host repository, or the Docker socket into the agent container.
+
+## Real baseline
+
+Build and run the fixed Codex baseline with a project-scoped `CODEX_API_KEY` available only in the invoking shell:
+
+```bash
+docker build -f Dockerfile.codex-baseline -t ari-codex-baseline:0.150.1 .
+uv run ari run-suite \
+  --mode docker \
+  --docker-image ari-codex-baseline:0.150.1 \
+  --agent-command codex-baseline \
+  --allow-network \
+  --secret-env CODEX_API_KEY \
+  --timeout 900
+```
+
+The adapter is intentionally minimal. It reads the existing baseline prompt, runs one fresh non-interactive Codex turn, tees the raw JSONL trajectory, captures the final response, and extracts usage. It does not add workflow logic.

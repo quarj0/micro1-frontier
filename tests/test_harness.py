@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
 from regression_investigator.evaluator import evaluate_workspace
-from regression_investigator.harness import discover_cases, load_case, run_case
+from regression_investigator.harness import (
+    _prepare_workspace,
+    _run_git,
+    discover_cases,
+    load_case,
+    run_case,
+)
 from regression_investigator.models import ExecutionMode
 
 
@@ -66,3 +74,21 @@ def test_three_development_cases_complete_the_subprocess_loop(tmp_path: Path):
     assert all(report.patch for report in reports)
     assert all(report.trajectory_events == 1 for report in reports)
     assert len(list((root / "benchmark" / "results").glob("*/report.json"))) == 3
+
+
+def test_patch_capture_can_be_based_on_revision_before_agent_commit(tmp_path: Path):
+    root = isolated_benchmark_root(tmp_path)
+    case_dir = discover_cases(root)["response-contract-drift"]
+    workspace, _, baseline_revision = _prepare_workspace(
+        case_dir, tmp_path / "prepared", root / "prompts" / "baseline.md"
+    )
+    subprocess_agent = PROJECT_ROOT / "tests" / "fixtures" / "committing_agent.py"
+    env = {
+        "ARI_WORKSPACE": str(workspace),
+        **os.environ,
+    }
+    subprocess.run([sys.executable, subprocess_agent], env=env, check=True)
+
+    patch = _run_git(workspace, "diff", "--binary", baseline_revision)
+
+    assert "agent-created.txt" in patch

@@ -36,6 +36,8 @@ The harness invokes any command supplied through `--agent-command`; no provider 
 | `ARI_PROMPT_PATH` | Baseline instruction and issue report. |
 | `ARI_TRAJECTORY_PATH` | Optional JSONL trajectory output path. |
 | `ARI_EXECUTION_MODE` | `docker` for official isolation or `subprocess` for development. |
+| `ARI_USAGE_PATH` | Optional normalized usage JSON output path. |
+| `ARI_FINAL_RESPONSE_PATH` | Optional final natural-language response path. |
 
 The harness captures stdout, stderr, exit status, launch errors, hard timeouts, runtime, Git patch, changed paths, and trajectory events. An agent may modify only the workspace presented to it.
 
@@ -64,6 +66,50 @@ uv run ari run response-contract-drift \
 
 Commands are passed directly, not through a shell. Environment-variable expansion in the example therefore needs to be performed by the agent command itself or by an explicit shell entrypoint inside the image.
 
+## Real Codex baseline
+
+The first credible baseline is one Codex CLI agent with one simple instruction. It fixes these controls for the baseline and later workflow variants:
+
+- Codex CLI `0.150.1`.
+- `gpt-5.6-sol`.
+- Medium reasoning.
+- No subagents, memories, skill discovery, plugins, apps, retry orchestration, evidence gate, or independent verifier.
+
+The adapter invokes a fresh `codex exec --json --ephemeral` turn, captures the raw JSONL stream and final response, and normalizes the `turn.completed` token usage. API-key runs also receive a clearly labeled cost estimate from the versioned pricing snapshot in `agents/codex-baseline/pricing.json`.
+
+Build the pinned baseline image:
+
+```bash
+docker build -f Dockerfile.codex-baseline -t ari-codex-baseline:0.150.1 .
+```
+
+Set a project-scoped `CODEX_API_KEY` in the invoking shell without writing it into this repository, then run:
+
+```bash
+uv run ari run-suite \
+  --mode docker \
+  --docker-image ari-codex-baseline:0.150.1 \
+  --agent-command codex-baseline \
+  --allow-network \
+  --secret-env CODEX_API_KEY \
+  --timeout 900
+```
+
+`--secret-env` adds only the variable name to Docker argv. Docker inherits its value from the harness process; the value is not included in the report, trajectory, image, or workspace. The synthetic repository can still execute code inside the container, so use a scoped benchmark key with an appropriate spend limit.
+
+Every Docker baseline run starts with an empty temporary `CODEX_HOME`, ignores user configuration and execution rules, disables stateful or multi-agent features, and persists no Codex session. The only host mount remains the prepared case workspace.
+
+For a non-isolated development check, the same adapter can reuse authentication shared by the host Codex CLI and VS Code extension:
+
+```bash
+uv run ari run response-contract-drift \
+  --mode subprocess \
+  --agent-command "$(pwd)/.venv/bin/python $(pwd)/agents/codex-baseline/adapter.py" \
+  --timeout 900
+```
+
+Do not report subprocess results as official benchmark evidence.
+
 ## Development-only subprocess mode
 
 Subprocess mode is faster but **not isolated**. The command inherits the host environment and may be able to traverse beyond its workspace. Never use subprocess results as official benchmark evidence.
@@ -86,7 +132,8 @@ benchmark/results/<run-id>/
 ├── agent.stdout.log
 ├── agent.stderr.log
 ├── evaluator.stdout.log
-└── evaluator.stderr.log
+├── evaluator.stderr.log
+└── final-response.md        # when supplied by the adapter
 
 trajectories/<run-id>.jsonl
 ```

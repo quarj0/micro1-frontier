@@ -22,6 +22,9 @@
     "patch_files": {"type": "array", "items": {"type": "string"}},
     "trajectory_events": {"type": "integer", "minimum": 0},
     "trajectory_error": {"type": ["string", "null"]},
+    "usage": {"type": ["object", "null"]},
+    "usage_error": {"type": ["string", "null"]},
+    "final_response": {"type": ["string", "null"]},
     "agent": {"$ref": "#/$defs/process"},
     "evaluator": {"$ref": "#/$defs/process"},
     "metrics": {"type": "object"}

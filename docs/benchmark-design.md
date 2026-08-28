@@ -32,6 +32,12 @@ The evaluator runs as a host process only after the agent container has terminat
 
 Subprocess mode provides no security boundary and exists only for rapid harness development.
 
+## Fixed model control
+
+The baseline and all later workflow variants use Codex CLI 0.150.1 with `gpt-5.6-sol` at medium reasoning. Model and reasoning level are controlled variables: workflow changes must not alter them. Official Codex runs also use a fresh, ephemeral `CODEX_HOME`, ignore user configuration and rules, and disable multi-agent, memory, plugin, app, and skill-discovery features.
+
+The hosted model requires an explicit `--allow-network` exception. Credentials are forwarded by environment-variable name at runtime and never written into the repository, workspace, image, trajectory, or report. Case repositories contain only controlled synthetic code and data.
+
 ## Case layout
 
 ```text

@@ -1,0 +1,11 @@
+{
+  "model": "gpt-5.6-sol",
+  "currency": "USD",
+  "unit_tokens": 1000000,
+  "input_per_unit": 4.0,
+  "cached_input_per_unit": 0.4,
+  "output_per_unit": 20.0,
+  "as_of": "2026-08-28",
+  "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+  "notes": "Estimate assumes no individual request exceeds the model's 272K long-context pricing threshold. Reasoning tokens are included in output tokens and are not charged twice."
+}

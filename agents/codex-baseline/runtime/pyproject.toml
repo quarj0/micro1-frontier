@@ -1,0 +1,12 @@
+[project]
+name = "ari-codex-baseline-runtime"
+version = "0.0.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "Django==5.2.5",
+  "djangorestframework==3.16.1",
+]
+
+[tool.uv]
+package = false
+

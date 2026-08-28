@@ -44,6 +44,13 @@ def _parser() -> argparse.ArgumentParser:
         help="Opt in to agent-container network access",
     )
     run.add_argument(
+        "--secret-env",
+        action="append",
+        default=[],
+        metavar="NAME",
+        help="Forward one host environment variable by name without recording its value",
+    )
+    run.add_argument(
         "--keep-workspace",
         action="store_true",
         help="Copy final workspace into ignored results",
@@ -57,6 +64,7 @@ def _parser() -> argparse.ArgumentParser:
     suite.add_argument("--docker-image")
     suite.add_argument("--timeout", type=int, default=300)
     suite.add_argument("--allow-network", action="store_true")
+    suite.add_argument("--secret-env", action="append", default=[], metavar="NAME")
     return parser
 
 
@@ -68,6 +76,8 @@ def _validate(args: argparse.Namespace) -> None:
         raise BenchmarkConfigurationError("--docker-image is required in Docker mode")
     if getattr(args, "timeout", 1) <= 0:
         raise BenchmarkConfigurationError("--timeout must be positive")
+    if getattr(args, "secret_env", []) and getattr(args, "mode", None) != "docker":
+        raise BenchmarkConfigurationError("--secret-env is supported only in Docker mode")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -94,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout,
                 docker_image=args.docker_image,
                 allow_network=args.allow_network,
+                secret_environment=tuple(args.secret_env),
                 keep_workspace=args.keep_workspace,
             )
             print(json.dumps(report.metrics, sort_keys=True))
@@ -110,6 +121,7 @@ def main(argv: list[str] | None = None) -> int:
                 timeout_seconds=args.timeout,
                 docker_image=args.docker_image,
                 allow_network=args.allow_network,
+                secret_environment=tuple(args.secret_env),
             )
             reports.append(report.to_dict())
             print(f"{case_id}: {'PASS' if report.evaluator.passed else 'FAIL'}")

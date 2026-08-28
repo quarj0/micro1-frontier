@@ -39,6 +39,7 @@ class AgentInvocation:
     mode: ExecutionMode
     docker_image: str | None = None
     allow_network: bool = False
+    secret_environment: tuple[str, ...] = ()
     environment: dict[str, str] = field(default_factory=dict)
 
 
@@ -71,6 +72,9 @@ class RunReport:
     patch_files: list[str]
     trajectory_events: int
     trajectory_error: str | None
+    usage: dict[str, Any] | None
+    usage_error: str | None
+    final_response: str | None
     metrics: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:

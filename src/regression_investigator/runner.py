@@ -5,6 +5,7 @@ import signal
 import subprocess
 import time
 import uuid
+import re
 from collections.abc import Callable
 from pathlib import Path
 
@@ -87,6 +88,16 @@ def _contract_environment(
             else str(invocation.trajectory_path)
         ),
         "ARI_EXECUTION_MODE": invocation.mode.value,
+        "ARI_USAGE_PATH": (
+            f"{workspace}/.ari/usage.json"
+            if workspace == "/workspace"
+            else str(invocation.workspace / ".ari" / "usage.json")
+        ),
+        "ARI_FINAL_RESPONSE_PATH": (
+            f"{workspace}/.ari/final-response.md"
+            if workspace == "/workspace"
+            else str(invocation.workspace / ".ari" / "final-response.md")
+        ),
         **invocation.environment,
     }
 
@@ -150,6 +161,22 @@ def _run_docker(invocation: AgentInvocation) -> ProcessResult:
     ]
     for key, value in _contract_environment(invocation, "/workspace").items():
         command.extend(["--env", f"{key}={value}"])
+    for key in invocation.secret_environment:
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key):
+            raise ValueError(f"invalid secret environment variable name: {key!r}")
+        if key not in os.environ:
+            return ProcessResult(
+                state=ProcessState.LAUNCH_ERROR,
+                command=command,
+                exit_code=None,
+                runtime_seconds=0.0,
+                stdout="",
+                stderr="",
+                error=f"required secret environment variable is unset: {key}",
+            )
+        # Docker inherits the value from this process. The value never appears
+        # in argv, reports, or the workspace.
+        command.extend(["--env", key])
     command.extend([invocation.docker_image, *invocation.command])
 
     started = time.monotonic()

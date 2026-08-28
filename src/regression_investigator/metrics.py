@@ -10,6 +10,7 @@ def calculate_metrics(
     evaluator: EvaluationResult,
     patch_files: list[str],
     trajectory: list[dict[str, Any]],
+    usage: dict[str, Any] | None,
 ) -> dict[str, object]:
     event_types = {str(event.get("type")) for event in trajectory}
     evidence_chain_complete = {
@@ -29,6 +30,11 @@ def calculate_metrics(
         "files_changed": len(patch_files),
         "agent_runtime_seconds": round(agent.runtime_seconds, 3),
         "evaluation_runtime_seconds": round(evaluator.runtime_seconds, 3),
+        "input_tokens": usage.get("input_tokens") if usage else None,
+        "cached_input_tokens": usage.get("cached_input_tokens") if usage else None,
+        "output_tokens": usage.get("output_tokens") if usage else None,
+        "reasoning_output_tokens": usage.get("reasoning_output_tokens") if usage else None,
+        "estimated_cost_usd": usage.get("estimated_cost_usd") if usage else None,
     }
 
 
