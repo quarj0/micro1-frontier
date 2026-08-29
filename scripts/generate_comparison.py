@@ -127,7 +127,15 @@ def build_artifact(spec_path: Path) -> dict[str, Any]:
     }
     if "title" in spec:
         artifact["title"] = spec["title"]
-    for field in ("controls_manifest", "execution_mode", "classification"):
+    for field in (
+        "controls_manifest",
+        "execution_mode",
+        "classification",
+        "reference_artifact",
+        "reference_artifact_sha256",
+        "control_hashes",
+        "excluded_invalid_runs",
+    ):
         if field in spec:
             artifact[field] = spec[field]
     return artifact

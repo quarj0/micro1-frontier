@@ -1,0 +1,226 @@
+{
+  "aggregate": [
+    {
+      "cached_input_tokens": 442880,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 0,
+      "input_tokens": 538502,
+      "output_tokens": 19036,
+      "reasoning_output_tokens": 3733,
+      "retry_count": 0,
+      "runtime_seconds": 480.771625,
+      "verified_repairs": 4,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 426752,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 4,
+      "input_tokens": 539143,
+      "output_tokens": 11851,
+      "reasoning_output_tokens": 3128,
+      "retry_count": 0,
+      "runtime_seconds": 372.75948,
+      "verified_repairs": 4,
+      "workflow": "advanced-v2"
+    }
+  ],
+  "classification": "development/tuning only; not an official isolated API-key benchmark run",
+  "comparison_id": "advanced-v2-heldout-tuning",
+  "control_hashes": {
+    "adapter_sha256": "0f99b8d13e9713006b808f18d4fb3c2c00cac29907ad6d5b03c09b393236e347",
+    "config_sha256": "afe26caff65f818a775ada26cd9bc1a81d557e9cfcd426235b3eac1708c29822",
+    "implementation_commit": "0eec618",
+    "maximum_retries": 1,
+    "model": "gpt-5.6-sol",
+    "output_schema_sha256": "6b5c0175994e085ff9ad83d1e61c8f85a3db77cc88227aed655ce3cefe3f5002",
+    "prompt_sha256": "dc2bd36a8c8040c82646ff95d133150a6e36c1262660a1d19847a711bc94b810",
+    "reasoning_effort": "medium",
+    "recorder_sha256": "007e4f563584dff6319694fa057f2a2ee845263ae9149d050f79febd5eb3757e",
+    "validator_sha256": "5596c8365c4f52da618bef4257415aa309690bf6d8f7f3d9dcbe00cc300887ec"
+  },
+  "controls_manifest": "benchmark/cases/heldout/suite.toml",
+  "excluded_invalid_runs": [
+    "20260829T130441Z-cross-tenant-cache-contamination-f5bff2ff",
+    "20260829T130447Z-cross-tenant-data-exposure-44524d69",
+    "20260829T130455Z-query-count-regression-6a4c7ec1",
+    "20260829T130501Z-unstable-cursor-pagination-d571e64c"
+  ],
+  "execution_mode": "subprocess",
+  "reference_artifact": "benchmark/comparisons/heldout-v1.json",
+  "reference_artifact_sha256": "54e006068cfa7de9e74e6cfa6c5d3fac99a3cba7bde1d4423112a8c609ffcb25",
+  "rows": [
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "cross-tenant-cache-contamination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 126518,
+      "output_tokens": 4431,
+      "reasoning_output_tokens": 985,
+      "retry_count": 0,
+      "run_id": "20260829T123410Z-cross-tenant-cache-contamination-bd80456f",
+      "runtime_seconds": 111.49949876000028,
+      "source_report": "benchmark/results/20260829T123410Z-cross-tenant-cache-contamination-bd80456f/report.json",
+      "source_report_sha256": "14b97ba7dfb730ee043930cd2cc02c3602116707fd61e83df9cc7d5f4fb65051",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 114688,
+      "case_id": "cross-tenant-data-exposure",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 137402,
+      "output_tokens": 4209,
+      "reasoning_output_tokens": 670,
+      "retry_count": 0,
+      "run_id": "20260829T123603Z-cross-tenant-data-exposure-d282d5bf",
+      "runtime_seconds": 116.36973530599971,
+      "source_report": "benchmark/results/20260829T123603Z-cross-tenant-data-exposure-d282d5bf/report.json",
+      "source_report_sha256": "06ab3e344fae24fc4b68bea55afc511ea92464ae2df792922150c9dbf95af6dc",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 122880,
+      "case_id": "query-count-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 148288,
+      "output_tokens": 4658,
+      "reasoning_output_tokens": 933,
+      "retry_count": 0,
+      "run_id": "20260829T123801Z-query-count-regression-10bb46fc",
+      "runtime_seconds": 120.50689246799993,
+      "source_report": "benchmark/results/20260829T123801Z-query-count-regression-10bb46fc/report.json",
+      "source_report_sha256": "762467e15bd653009c20c67efde7ffdd4448826d9f56a4b71c0dab305f1e3582",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "unstable-cursor-pagination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 126294,
+      "output_tokens": 5738,
+      "reasoning_output_tokens": 1145,
+      "retry_count": 0,
+      "run_id": "20260829T124002Z-unstable-cursor-pagination-9dfdeed1",
+      "runtime_seconds": 132.39549874099976,
+      "source_report": "benchmark/results/20260829T124002Z-unstable-cursor-pagination-9dfdeed1/report.json",
+      "source_report_sha256": "c59a121bc43768af907dd53f8aa54db79dd0caa0f7692918fc0133b1f7e90dfc",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "cross-tenant-cache-contamination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 126066,
+      "output_tokens": 2714,
+      "reasoning_output_tokens": 568,
+      "retry_count": 0,
+      "run_id": "20260829T130609Z-cross-tenant-cache-contamination-ec90181d",
+      "runtime_seconds": 80.81471660199895,
+      "source_report": "benchmark/results/20260829T130609Z-cross-tenant-cache-contamination-ec90181d/report.json",
+      "source_report_sha256": "42ca8d5bce9794ffda815c52cf5e043c4cfdf40b6e196580cc50726f111cb2e0",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 85504,
+      "case_id": "cross-tenant-data-exposure",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 124449,
+      "output_tokens": 2498,
+      "reasoning_output_tokens": 656,
+      "retry_count": 0,
+      "run_id": "20260829T130732Z-cross-tenant-data-exposure-070153fe",
+      "runtime_seconds": 86.52137063499868,
+      "source_report": "benchmark/results/20260829T130732Z-cross-tenant-data-exposure-070153fe/report.json",
+      "source_report_sha256": "31795bd70d5f472a37088e88f8771fb27646c62157ab1cadb6d77668c476ea3b",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 119808,
+      "case_id": "query-count-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 144766,
+      "output_tokens": 3247,
+      "reasoning_output_tokens": 1034,
+      "retry_count": 0,
+      "run_id": "20260829T130859Z-query-count-regression-8d3dc213",
+      "runtime_seconds": 106.62197363999985,
+      "source_report": "benchmark/results/20260829T130859Z-query-count-regression-8d3dc213/report.json",
+      "source_report_sha256": "1299320076c1459d09579ddf56ae93af25b020a30f6b863b9d703082742e0c6b",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 118784,
+      "case_id": "unstable-cursor-pagination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 143862,
+      "output_tokens": 3392,
+      "reasoning_output_tokens": 870,
+      "retry_count": 0,
+      "run_id": "20260829T131047Z-unstable-cursor-pagination-ee01837b",
+      "runtime_seconds": 98.80141881700001,
+      "source_report": "benchmark/results/20260829T131047Z-unstable-cursor-pagination-ee01837b/report.json",
+      "source_report_sha256": "825ba3da16cdf4e9093eafa6ed2c6562257a9f50c540bf2d47592e7696bfbec5",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    }
+  ],
+  "schema_version": "1.0",
+  "selection_policy": "Advanced-v1 uses the exact four run IDs already selected in the immutable heldout-v1 comparison. Advanced-v2 uses the first completed four-case evaluation after fixing an API-rejected response-schema keyword; the preceding four attempts are retained but excluded because the service rejected the schema before any agent turn executed, reported no usage, and produced no patch.",
+  "source_spec": "benchmark/comparisons/advanced-v2-heldout-tuning.spec.json",
+  "title": "Advanced v1 vs v2 held-out tuning comparison"
+}

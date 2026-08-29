@@ -175,6 +175,8 @@ uv run --frozen ari run-suite \
 
 For an official isolated run, build `Dockerfile.codex-advanced-v2` and use the same secret-forwarding pattern documented for V1. Agent containers remain network-disabled unless explicitly opted in; OpenAI API execution requires the same narrowly scoped network exception as the earlier workflows.
 
+The four-case development/tuning results are recorded in the [machine-generated V1-vs-V2 artifact](benchmark/comparisons/advanced-v2-heldout-tuning.json) and its [aggregate table](benchmark/comparisons/advanced-v2-heldout-tuning.md). The original held-out V1 comparison remains immutable.
+
 ## Held-out suite
 
 The `heldout` suite currently covers cross-tenant object exposure, unstable cursor traversal with tied sort values, serializer-driven query-count growth, and cross-tenant cache contamination:
