@@ -1,0 +1,206 @@
+{
+  "aggregate": [
+    {
+      "cached_input_tokens": 485888,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 0,
+      "input_tokens": 610689,
+      "output_tokens": 10665,
+      "reasoning_output_tokens": 2806,
+      "retry_count": 0,
+      "runtime_seconds": 374.252063,
+      "verified_repairs": 4,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 442880,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 0,
+      "input_tokens": 538502,
+      "output_tokens": 19036,
+      "reasoning_output_tokens": 3733,
+      "retry_count": 0,
+      "runtime_seconds": 480.771625,
+      "verified_repairs": 4,
+      "workflow": "advanced-v1"
+    }
+  ],
+  "classification": "development-only; not an official isolated API-key benchmark run",
+  "comparison_id": "heldout-v1",
+  "controls_manifest": "benchmark/cases/heldout/suite.toml",
+  "execution_mode": "subprocess",
+  "rows": [
+    {
+      "cached_input_tokens": 153088,
+      "case_id": "cross-tenant-cache-contamination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 178982,
+      "output_tokens": 3149,
+      "reasoning_output_tokens": 784,
+      "retry_count": 0,
+      "run_id": "20260829T122720Z-cross-tenant-cache-contamination-32d0f639",
+      "runtime_seconds": 101.43209598000067,
+      "source_report": "benchmark/results/20260829T122720Z-cross-tenant-cache-contamination-32d0f639/report.json",
+      "source_report_sha256": "2d83470acbc6586494f0d939a1ce48fa7ec59e95164aff499fe8846fa64d7703",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 98560,
+      "case_id": "cross-tenant-data-exposure",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 136819,
+      "output_tokens": 2096,
+      "reasoning_output_tokens": 324,
+      "retry_count": 0,
+      "run_id": "20260829T122903Z-cross-tenant-data-exposure-594f7604",
+      "runtime_seconds": 74.67745769199973,
+      "source_report": "benchmark/results/20260829T122903Z-cross-tenant-data-exposure-594f7604/report.json",
+      "source_report_sha256": "ed32095f240e3b86e20c9f872417406c9cf30cbfc4bd93f8c47bcdd9a892f337",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 127744,
+      "case_id": "query-count-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 152111,
+      "output_tokens": 2436,
+      "reasoning_output_tokens": 600,
+      "retry_count": 0,
+      "run_id": "20260829T123019Z-query-count-regression-a5823657",
+      "runtime_seconds": 102.17534170200088,
+      "source_report": "benchmark/results/20260829T123019Z-query-count-regression-a5823657/report.json",
+      "source_report_sha256": "f6577914c41ee4f4a665e3898338fe072486a5ffbdc6e36837f50ce36a6d853e",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 106496,
+      "case_id": "unstable-cursor-pagination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 142777,
+      "output_tokens": 2984,
+      "reasoning_output_tokens": 1098,
+      "retry_count": 0,
+      "run_id": "20260829T123202Z-unstable-cursor-pagination-f31d026e",
+      "runtime_seconds": 95.96716734300026,
+      "source_report": "benchmark/results/20260829T123202Z-unstable-cursor-pagination-f31d026e/report.json",
+      "source_report_sha256": "a2594dcab7c7fbd1f148a32288043242a63e29f5d6b5a441812d41395d553ad1",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "cross-tenant-cache-contamination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 126518,
+      "output_tokens": 4431,
+      "reasoning_output_tokens": 985,
+      "retry_count": 0,
+      "run_id": "20260829T123410Z-cross-tenant-cache-contamination-bd80456f",
+      "runtime_seconds": 111.49949876000028,
+      "source_report": "benchmark/results/20260829T123410Z-cross-tenant-cache-contamination-bd80456f/report.json",
+      "source_report_sha256": "14b97ba7dfb730ee043930cd2cc02c3602116707fd61e83df9cc7d5f4fb65051",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 114688,
+      "case_id": "cross-tenant-data-exposure",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 137402,
+      "output_tokens": 4209,
+      "reasoning_output_tokens": 670,
+      "retry_count": 0,
+      "run_id": "20260829T123603Z-cross-tenant-data-exposure-d282d5bf",
+      "runtime_seconds": 116.36973530599971,
+      "source_report": "benchmark/results/20260829T123603Z-cross-tenant-data-exposure-d282d5bf/report.json",
+      "source_report_sha256": "06ab3e344fae24fc4b68bea55afc511ea92464ae2df792922150c9dbf95af6dc",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 122880,
+      "case_id": "query-count-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 148288,
+      "output_tokens": 4658,
+      "reasoning_output_tokens": 933,
+      "retry_count": 0,
+      "run_id": "20260829T123801Z-query-count-regression-10bb46fc",
+      "runtime_seconds": 120.50689246799993,
+      "source_report": "benchmark/results/20260829T123801Z-query-count-regression-10bb46fc/report.json",
+      "source_report_sha256": "762467e15bd653009c20c67efde7ffdd4448826d9f56a4b71c0dab305f1e3582",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    },
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "unstable-cursor-pagination",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 126294,
+      "output_tokens": 5738,
+      "reasoning_output_tokens": 1145,
+      "retry_count": 0,
+      "run_id": "20260829T124002Z-unstable-cursor-pagination-9dfdeed1",
+      "runtime_seconds": 132.39549874099976,
+      "source_report": "benchmark/results/20260829T124002Z-unstable-cursor-pagination-9dfdeed1/report.json",
+      "source_report_sha256": "c59a121bc43768af907dd53f8aa54db79dd0caa0f7692918fc0133b1f7e90dfc",
+      "suite": "heldout",
+      "verified_repair": true,
+      "workflow": "advanced-v1"
+    }
+  ],
+  "schema_version": "1.0",
+  "selection_policy": "First completed frozen-workflow evaluation of all four held-out-v1 cases. Cases and hidden evaluators were not changed after either workflow result was observed.",
+  "source_spec": "benchmark/comparisons/heldout-v1.spec.json",
+  "title": "Held-out v1 frozen-workflow comparison"
+}

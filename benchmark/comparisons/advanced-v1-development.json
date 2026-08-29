@@ -53,6 +53,7 @@
       "runtime_seconds": 99.91251986600037,
       "source_report": "benchmark/results/20260828T173338Z-incorrect-boolean-filtering-46307144/report.json",
       "source_report_sha256": "a5b841cb84eef0468c0e373b29867ad0d6f6caaf85a2ea942c6faeda2dbd4207",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "baseline"
     },
@@ -72,6 +73,7 @@
       "runtime_seconds": 120.31662977399992,
       "source_report": "benchmark/results/20260828T173549Z-nested-write-atomicity-857ba687/report.json",
       "source_report_sha256": "aabc35b9ca59f7de5bd18a56a6d4cecc20b8547ef93c7c6fa6c01e98ae1e87f6",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "baseline"
     },
@@ -91,6 +93,7 @@
       "runtime_seconds": 107.22517430300013,
       "source_report": "benchmark/results/20260828T172704Z-response-contract-drift-5bb96a4e/report.json",
       "source_report_sha256": "50870972e5c2d74fef741a36977513367c335d59fa02cb1070257cbee4baa187",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "baseline"
     },
@@ -110,6 +113,7 @@
       "runtime_seconds": 86.05565479000006,
       "source_report": "benchmark/results/20260829T090013Z-incorrect-boolean-filtering-c1b9ef33/report.json",
       "source_report_sha256": "b4d5dd14bebfee37d987e9d8abfa96ed87a8bd780b0ec24856ce7afb4dfa989c",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "advanced-v1"
     },
@@ -129,6 +133,7 @@
       "runtime_seconds": 97.515325695,
       "source_report": "benchmark/results/20260829T090140Z-nested-write-atomicity-0ea6ec67/report.json",
       "source_report_sha256": "268a3a7613b049f4019f8410285586c97d4f112a36f85bd5d3263f4175735a0e",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "advanced-v1"
     },
@@ -148,6 +153,7 @@
       "runtime_seconds": 75.93218217799995,
       "source_report": "benchmark/results/20260829T090319Z-response-contract-drift-5022f114/report.json",
       "source_report_sha256": "ef58a845e8e7dbc2f2f18717ef1555b7b723f9d9e4c067130f3e9f9749a6ba25",
+      "suite": "dev",
       "verified_repair": true,
       "workflow": "advanced-v1"
     }

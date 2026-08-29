@@ -1,0 +1,6 @@
+id = "unstable-cursor-pagination"
+title = "Cursor pagination skips tied records"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60

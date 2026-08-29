@@ -4,6 +4,8 @@
 
 The development suite validates the benchmark machinery and provides public cases for improving an evidence-disciplined workflow. It is not the final held-out evaluation set.
 
+The `heldout-v1` suite adds four harder cases covering object-level tenant isolation, tied-value cursor traversal, bounded ORM query counts, and tenant-aware caching. Its manifest records hashes for both prompts, adapters, and model-control files before evaluation. Agent workspaces contain the case input only; suite metadata, oracles, evaluator code, other cases, and construction notes stay outside the sandbox.
+
 Each case contains a standalone broken Django/DRF repository with its own pinned `pyproject.toml` and `uv.lock`, a realistic issue report, synthetic data, ordinary visible tests, and a separate evaluator. The agent is expected to establish the failure, locate its cause, make a production-code repair, and leave reviewable evidence.
 
 ## Trust boundary

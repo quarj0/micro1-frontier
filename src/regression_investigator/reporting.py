@@ -35,6 +35,7 @@ def write_report(report: RunReport, output_dir: Path) -> None:
     markdown = f"""# Benchmark run: {report.case_id}
 
 - Run: `{report.run_id}`
+- Suite: `{report.suite}`
 - Mode: `{report.mode}`
 - Workflow: `{report.workflow}`
 - Agent state: `{report.agent.state}` ({report.agent.runtime_seconds:.3f}s)

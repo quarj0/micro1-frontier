@@ -1,0 +1,1 @@
+"""Synthetic tenant API."""

@@ -158,6 +158,25 @@ python scripts/generate_comparison.py --check
 
 See [the machine-readable artifact](benchmark/comparisons/advanced-v1-development.json) and [its generated aggregate table](benchmark/comparisons/advanced-v1-development.md). Existing private run outputs are read but never changed by the generator.
 
+## Held-out suite
+
+The `heldout` suite currently covers cross-tenant object exposure, unstable cursor traversal with tied sort values, serializer-driven query-count growth, and cross-tenant cache contamination:
+
+```bash
+uv run ari list-cases --suite heldout
+uv run ari run-suite \
+  --suite heldout \
+  --workflow advanced-v1 \
+  --mode docker \
+  --docker-image ari-codex-advanced:0.150.1 \
+  --agent-command codex-advanced \
+  --allow-network \
+  --secret-env CODEX_API_KEY \
+  --timeout 900
+```
+
+The suite manifest freezes prompt, adapter, and model-control hashes before evaluation. See [heldout-v1 results](benchmark/comparisons/heldout-v1.md) and the corresponding [machine-readable artifact](benchmark/comparisons/heldout-v1.json).
+
 ## Development-only subprocess mode
 
 Subprocess mode is faster but **not isolated**. The command inherits the host environment and may be able to traverse beyond its workspace. Never use subprocess results as official benchmark evidence.

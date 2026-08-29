@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.ProjectDetailView.get"]
+required_property = "project lookup is scoped to the authenticated tenant before serialization"
+forbidden_behavior = "a tenant can distinguish or retrieve another tenant's project by primary key"

@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 from regression_investigator.evaluator import evaluate_workspace
@@ -18,6 +19,10 @@ from regression_investigator.models import ExecutionMode
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+FROZEN_PROMPT_HASHES = {
+    "baseline.md": "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576",
+    "advanced-v1.md": "7fa8137acb6c98e26bbbb6f25512678d5098333378b0e4193bd5f41363583927",
+}
 
 
 def isolated_benchmark_root(tmp_path: Path) -> Path:
@@ -30,26 +35,64 @@ def isolated_benchmark_root(tmp_path: Path) -> Path:
 
 
 def test_case_inputs_do_not_contain_hidden_evaluator_material():
-    for case_dir in discover_cases(PROJECT_ROOT).values():
-        visible_files = {path.name for path in (case_dir / "input").rglob("*") if path.is_file()}
-        assert "oracle.toml" not in visible_files
-        assert "test_regression.py" not in visible_files
+    for suite in ("dev", "heldout"):
+        for case_dir in discover_cases(PROJECT_ROOT, suite).values():
+            visible_files = {
+                path.name for path in (case_dir / "input").rglob("*") if path.is_file()
+            }
+            assert "oracle.toml" not in visible_files
+            assert "test_regression.py" not in visible_files
 
 
 def test_hidden_evaluators_reject_every_broken_input(tmp_path: Path):
-    for case_id, case_dir in discover_cases(PROJECT_ROOT).items():
-        workspace = tmp_path / case_id
-        shutil.copytree(case_dir / "input" / "repo", workspace)
-        evaluator = load_case(case_dir)["evaluator"]
+    for suite in ("dev", "heldout"):
+        for case_id, case_dir in discover_cases(PROJECT_ROOT, suite).items():
+            workspace = tmp_path / suite / case_id
+            shutil.copytree(case_dir / "input" / "repo", workspace)
+            evaluator = load_case(case_dir)["evaluator"]
 
-        result = evaluate_workspace(
-            case_dir,
-            workspace,
-            list(evaluator["command"]),
-            int(evaluator["timeout_seconds"]),
-        )
+            result = evaluate_workspace(
+                case_dir,
+                workspace,
+                list(evaluator["command"]),
+                int(evaluator["timeout_seconds"]),
+            )
 
-        assert result.passed is False, f"broken case unexpectedly passed: {case_id}"
+            assert result.passed is False, (
+                f"broken case unexpectedly passed: {suite}/{case_id}"
+            )
+
+
+def test_workflow_prompts_are_frozen_during_heldout_evaluation():
+    import hashlib
+
+    for name, expected in FROZEN_PROMPT_HASHES.items():
+        actual = hashlib.sha256((PROJECT_ROOT / "prompts" / name).read_bytes()).hexdigest()
+        assert actual == expected
+
+
+def test_heldout_manifest_freezes_complete_workflow_controls():
+    import hashlib
+
+    manifest_path = PROJECT_ROOT / "benchmark" / "cases" / "heldout" / "suite.toml"
+    with manifest_path.open("rb") as handle:
+        manifest = tomllib.load(handle)
+    paths = {
+        "baseline": {
+            "prompt_sha256": PROJECT_ROOT / "prompts" / "baseline.md",
+            "adapter_sha256": PROJECT_ROOT / "agents" / "codex-baseline" / "adapter.py",
+            "config_sha256": PROJECT_ROOT / "agents" / "codex-baseline" / "config.json",
+        },
+        "advanced-v1": {
+            "prompt_sha256": PROJECT_ROOT / "prompts" / "advanced-v1.md",
+            "adapter_sha256": PROJECT_ROOT / "agents" / "codex_advanced" / "adapter.py",
+            "config_sha256": PROJECT_ROOT / "agents" / "codex_advanced" / "config.json",
+        },
+    }
+    for workflow, fields in paths.items():
+        frozen = manifest["frozen_workflows"][workflow]
+        for field, path in fields.items():
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == frozen[field]
 
 
 def test_three_development_cases_complete_the_subprocess_loop(tmp_path: Path):

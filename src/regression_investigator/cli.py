@@ -22,12 +22,14 @@ def _parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="action", required=True)
 
-    subparsers.add_parser("list-cases", help="List development benchmark cases")
+    list_cases = subparsers.add_parser("list-cases", help="List benchmark cases")
+    list_cases.add_argument("--suite", choices=["dev", "heldout"], default="dev")
 
     run = subparsers.add_parser(
         "run", help="Run one case through an agent and evaluator"
     )
     run.add_argument("case")
+    run.add_argument("--suite", choices=["dev", "heldout"], default="dev")
     run.add_argument(
         "--agent-command",
         required=True,
@@ -61,7 +63,8 @@ def _parser() -> argparse.ArgumentParser:
         help="Copy final workspace into ignored results",
     )
 
-    suite = subparsers.add_parser("run-suite", help="Run all development cases")
+    suite = subparsers.add_parser("run-suite", help="Run every case in a suite")
+    suite.add_argument("--suite", choices=["dev", "heldout"], default="dev")
     suite.add_argument("--agent-command", required=True)
     suite.add_argument(
         "--mode", choices=[mode.value for mode in ExecutionMode], default="docker"
@@ -96,7 +99,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         _validate(args)
         if args.action == "list-cases":
-            for case_id in discover_cases(root):
+            for case_id in discover_cases(root, args.suite):
                 print(case_id)
             return 0
 
@@ -110,6 +113,7 @@ def main(argv: list[str] | None = None) -> int:
             report = run_case(
                 root=root,
                 case_id=args.case,
+                suite=args.suite,
                 command=command,
                 mode=mode,
                 workflow=workflow,
@@ -124,10 +128,11 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if report.evaluator.passed else 1
 
         reports = []
-        for case_id in discover_cases(root):
+        for case_id in discover_cases(root, args.suite):
             report = run_case(
                 root=root,
                 case_id=case_id,
+                suite=args.suite,
                 command=command,
                 mode=mode,
                 workflow=workflow,

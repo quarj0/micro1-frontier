@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.TenantPreferenceView.get"]
+required_property = "cache identity includes the resolved tenant identity"
+forbidden_behavior = "a warm cache can change another tenant's response or make an unknown tenant appear valid"

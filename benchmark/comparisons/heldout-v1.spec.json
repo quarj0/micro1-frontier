@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "comparison_id": "heldout-v1",
+  "title": "Held-out v1 frozen-workflow comparison",
+  "controls_manifest": "benchmark/cases/heldout/suite.toml",
+  "execution_mode": "subprocess",
+  "classification": "development-only; not an official isolated API-key benchmark run",
+  "selection_policy": "First completed frozen-workflow evaluation of all four held-out-v1 cases. Cases and hidden evaluators were not changed after either workflow result was observed.",
+  "workflows": {
+    "baseline": [
+      "20260829T122720Z-cross-tenant-cache-contamination-32d0f639",
+      "20260829T122903Z-cross-tenant-data-exposure-594f7604",
+      "20260829T123019Z-query-count-regression-a5823657",
+      "20260829T123202Z-unstable-cursor-pagination-f31d026e"
+    ],
+    "advanced-v1": [
+      "20260829T123410Z-cross-tenant-cache-contamination-bd80456f",
+      "20260829T123603Z-cross-tenant-data-exposure-d282d5bf",
+      "20260829T123801Z-query-count-regression-10bb46fc",
+      "20260829T124002Z-unstable-cursor-pagination-9dfdeed1"
+    ]
+  }
+}

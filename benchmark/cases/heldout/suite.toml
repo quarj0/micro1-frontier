@@ -1,0 +1,18 @@
+id = "heldout-v1"
+source_commit = "f4e9316402f52002a6b50022f47c75c8683f101c"
+case_ids = [
+  "cross-tenant-cache-contamination",
+  "cross-tenant-data-exposure",
+  "query-count-regression",
+  "unstable-cursor-pagination",
+]
+
+[frozen_workflows.baseline]
+prompt_sha256 = "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576"
+adapter_sha256 = "0584c74ea183bbc0e1faf6a7dd078b360eb22cad5e6e5cec94cc3bc430c0c0fd"
+config_sha256 = "e7c610dc14a814ed1e588c9ed1fe165a3148002e2a8901ab41a0ac53aa33f052"
+
+[frozen_workflows.advanced-v1]
+prompt_sha256 = "7fa8137acb6c98e26bbbb6f25512678d5098333378b0e4193bd5f41363583927"
+adapter_sha256 = "4fc3f077f8e42d5772f09c61ef9f84a3a29f7acc433493a702d51fd49e4cb46e"
+config_sha256 = "ea42617d40cc95aad42988e532f15dc949481b034b65dc74f69ccb30617e72a3"

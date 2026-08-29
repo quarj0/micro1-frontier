@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.AuditEventListView.get", "api.views.encode_cursor", "api.views.decode_cursor"]
+required_property = "cursor position includes a deterministic unique tie-breaker consistent with queryset ordering"
+page_size = 2

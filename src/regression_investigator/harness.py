@@ -120,16 +120,17 @@ def run_case(
     case_id: str,
     command: tuple[str, ...],
     mode: ExecutionMode,
-    workflow: Workflow = Workflow.BASELINE,
     timeout_seconds: int,
     docker_image: str | None,
+    suite: str = "dev",
+    workflow: Workflow = Workflow.BASELINE,
     allow_network: bool = False,
     secret_environment: tuple[str, ...] = (),
     keep_workspace: bool = False,
 ) -> RunReport:
-    cases = discover_cases(root)
+    cases = discover_cases(root, suite)
     if case_id not in cases:
-        raise BenchmarkConfigurationError(f"unknown development case: {case_id}")
+        raise BenchmarkConfigurationError(f"unknown {suite} case: {case_id}")
     case_dir = cases[case_id]
     case = load_case(case_dir)
     run_id = f"{datetime.now(UTC).strftime('%Y%m%dT%H%M%SZ')}-{case_id}-{uuid.uuid4().hex[:8]}"
@@ -191,6 +192,7 @@ def run_case(
             schema_version="1.0",
             run_id=run_id,
             case_id=case_id,
+            suite=suite,
             mode=mode.value,
             workflow=workflow.value,
             started_at=datetime.now(UTC).isoformat(),

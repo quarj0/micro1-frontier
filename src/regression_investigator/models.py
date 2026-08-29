@@ -72,6 +72,7 @@ class RunReport:
     schema_version: str
     run_id: str
     case_id: str
+    suite: str
     mode: str
     workflow: str
     started_at: str
