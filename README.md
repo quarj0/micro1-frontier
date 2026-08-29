@@ -149,6 +149,15 @@ uv run ari run-suite \
   --timeout 900
 ```
 
+The promoted development comparison is generated from an explicit list of run IDs:
+
+```bash
+python scripts/generate_comparison.py
+python scripts/generate_comparison.py --check
+```
+
+See [the machine-readable artifact](benchmark/comparisons/advanced-v1-development.json) and [its generated aggregate table](benchmark/comparisons/advanced-v1-development.md). Existing private run outputs are read but never changed by the generator.
+
 ## Development-only subprocess mode
 
 Subprocess mode is faster but **not isolated**. The command inherits the host environment and may be able to traverse beyond its workspace. Never use subprocess results as official benchmark evidence.

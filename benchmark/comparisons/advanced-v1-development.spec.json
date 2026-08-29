@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "comparison_id": "advanced-v1-development",
+  "selection_policy": "Latest successful real baseline run for each development case before advanced-v1 execution, compared with the clean successful advanced-v1 three-case suite after evidence validation was finalized.",
+  "workflows": {
+    "baseline": [
+      "20260828T173338Z-incorrect-boolean-filtering-46307144",
+      "20260828T173549Z-nested-write-atomicity-857ba687",
+      "20260828T172704Z-response-contract-drift-5bb96a4e"
+    ],
+    "advanced-v1": [
+      "20260829T090013Z-incorrect-boolean-filtering-c1b9ef33",
+      "20260829T090140Z-nested-write-atomicity-0ea6ec67",
+      "20260829T090319Z-response-contract-drift-5022f114"
+    ]
+  }
+}
