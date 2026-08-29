@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.CalendarDayView.get"]
+required_property = "the requested local date is converted from the supplied IANA timezone into half-open UTC query bounds"
+forbidden_behavior = "UTC midnight is treated as the day boundary for non-UTC clients, including DST transition days"

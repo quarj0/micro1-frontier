@@ -19,7 +19,7 @@
     "schema_version": {"const": "1.0"},
     "run_id": {"type": "string"},
     "case_id": {"type": "string"},
-    "suite": {"enum": ["dev", "heldout"]},
+    "suite": {"enum": ["dev", "heldout", "final"]},
     "mode": {"enum": ["docker", "subprocess"]},
     "workflow": {"enum": ["baseline", "advanced-v1", "advanced-v2"]},
     "patch": {"type": "string"},

@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.DocumentUploadView.parser_classes"]
+required_property = "multipart form requests are parsed so the file part reaches endpoint validation and persistence"
+forbidden_behavior = "a valid multipart upload is rejected as an unsupported media type before view validation"

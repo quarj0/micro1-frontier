@@ -1,0 +1,6 @@
+id = "idempotency-key-collision"
+title = "Tenant idempotency-key collision"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60

@@ -40,7 +40,7 @@ def isolated_benchmark_root(tmp_path: Path) -> Path:
 
 
 def test_case_inputs_do_not_contain_hidden_evaluator_material():
-    for suite in ("dev", "heldout"):
+    for suite in ("dev", "heldout", "final"):
         for case_dir in discover_cases(PROJECT_ROOT, suite).values():
             visible_files = {
                 path.name for path in (case_dir / "input").rglob("*") if path.is_file()
@@ -50,7 +50,7 @@ def test_case_inputs_do_not_contain_hidden_evaluator_material():
 
 
 def test_hidden_evaluators_reject_every_broken_input(tmp_path: Path):
-    for suite in ("dev", "heldout"):
+    for suite in ("dev", "heldout", "final"):
         for case_id, case_dir in discover_cases(PROJECT_ROOT, suite).items():
             workspace = tmp_path / suite / case_id
             shutil.copytree(case_dir / "input" / "repo", workspace)
@@ -101,6 +101,45 @@ def test_advanced_v2_keeps_v1_model_tools_and_retry_limit():
         "maximum_retries",
     ):
         assert v2[field] == v1[field]
+
+
+def test_final_suite_freezes_case_trees_and_workflow_controls():
+    import hashlib
+
+    final_root = PROJECT_ROOT / "benchmark" / "cases" / "final"
+    with (final_root / "suite.toml").open("rb") as handle:
+        manifest = tomllib.load(handle)
+
+    assert manifest["case_ids"] == sorted(discover_cases(PROJECT_ROOT, "final"))
+    for case_id, expected in manifest["case_sha256"].items():
+        digest = hashlib.sha256()
+        case_dir = final_root / case_id
+        for path in sorted(path for path in case_dir.rglob("*") if path.is_file()):
+            digest.update(path.relative_to(case_dir).as_posix().encode())
+            digest.update(b"\0")
+            digest.update(path.read_bytes())
+            digest.update(b"\0")
+        assert digest.hexdigest() == expected
+
+    control_paths = {
+        "baseline": {
+            "prompt_sha256": PROJECT_ROOT / "prompts" / "baseline.md",
+            "adapter_sha256": PROJECT_ROOT / "agents" / "codex-baseline" / "adapter.py",
+            "config_sha256": PROJECT_ROOT / "agents" / "codex-baseline" / "config.json",
+        },
+        "advanced-v2": {
+            "prompt_sha256": PROJECT_ROOT / "prompts" / "advanced-v2.md",
+            "adapter_sha256": PROJECT_ROOT / "agents" / "codex_advanced_v2" / "adapter.py",
+            "config_sha256": PROJECT_ROOT / "agents" / "codex_advanced_v2" / "config.json",
+            "validator_sha256": PROJECT_ROOT / "agents" / "codex_advanced_v2" / "evidence.py",
+            "recorder_sha256": PROJECT_ROOT / "agents" / "codex_advanced_v2" / "ari-evidence",
+            "output_schema_sha256": PROJECT_ROOT / "agents" / "codex_advanced_v2" / "evidence-output.schema.json",
+        },
+    }
+    for workflow, fields in control_paths.items():
+        frozen = manifest["frozen_workflows"][workflow]
+        for field, path in fields.items():
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == frozen[field]
 
 
 def test_heldout_manifest_freezes_complete_workflow_controls():

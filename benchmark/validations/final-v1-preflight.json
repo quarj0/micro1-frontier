@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "suite": "final-v1",
+  "validated_at": "2026-08-29T14:34:49Z",
+  "validation_commit_base": "f3c244d76664215a821c0478006be85f7aa32e69",
+  "policy": "Validation completed before any baseline or Advanced V2 final-suite invocation.",
+  "checks": {
+    "harness_tests": {
+      "command": "UV_CACHE_DIR=/tmp/ari-uv-cache uv run --frozen pytest -q",
+      "passed": true,
+      "tests": 26
+    },
+    "visible_tests_use_frozen_dependencies": true,
+    "hidden_tests_absent_from_case_input": true,
+    "broken_hidden_evaluators_fail": true,
+    "minimal_repair_hidden_evaluators_pass": true
+  },
+  "cases": [
+    {
+      "case_id": "file-upload-parser-regression",
+      "case_sha256": "e7e16c59c96fdd8a744e5b36104e595d7c2f57b4bde2464961a1da1b5632d562",
+      "visible_tests": "passed",
+      "broken_hidden_evaluator": "failed_as_intended",
+      "broken_observation": "multipart requests returned 415 instead of reaching 201 or 400 endpoint behavior",
+      "minimal_repair_evaluator": "passed"
+    },
+    {
+      "case_id": "idempotency-key-collision",
+      "case_sha256": "df4a456a9c5782f09ed9230a936fe918214c08f966f11dfa504a746b1efd65b3",
+      "visible_tests": "passed",
+      "broken_hidden_evaluator": "failed_as_intended",
+      "broken_observation": "the second tenant received 200 replay and only one charge existed",
+      "minimal_repair_evaluator": "passed"
+    },
+    {
+      "case_id": "project-approval-authorization",
+      "case_sha256": "54a625f1d473e43fe0333671c903b16216578203754b8a76b28d97bf2eeaeaf3",
+      "visible_tests": "passed",
+      "broken_hidden_evaluator": "failed_as_intended",
+      "broken_observation": "a manager of a sibling project received 200 instead of 403",
+      "minimal_repair_evaluator": "passed"
+    },
+    {
+      "case_id": "timezone-boundary-error",
+      "case_sha256": "f90bdbe8c481740fb308a6eccfc6c35d4f1e1cdec8ced86108a91c43758edac4",
+      "visible_tests": "passed",
+      "broken_hidden_evaluator": "failed_as_intended",
+      "broken_observation": "UTC day bounds returned the wrong event IDs for New York DST and Tokyo local days",
+      "minimal_repair_evaluator": "passed"
+    }
+  ]
+}

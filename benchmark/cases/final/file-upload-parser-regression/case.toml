@@ -1,0 +1,6 @@
+id = "file-upload-parser-regression"
+title = "Multipart file-upload parser regression"
+
+[evaluator]
+command = ["{python}", "manage.py", "test", "api", "benchmark_hidden_tests", "--verbosity", "1"]
+timeout_seconds = 60

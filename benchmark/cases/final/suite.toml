@@ -1,0 +1,28 @@
+id = "final-v1"
+workflow_source_commit = "f3c244d76664215a821c0478006be85f7aa32e69"
+classification = "final unseen one-shot evaluation; no workflow or case tuning after freeze"
+case_ids = [
+  "file-upload-parser-regression",
+  "idempotency-key-collision",
+  "project-approval-authorization",
+  "timezone-boundary-error",
+]
+
+[case_sha256]
+file-upload-parser-regression = "e7e16c59c96fdd8a744e5b36104e595d7c2f57b4bde2464961a1da1b5632d562"
+idempotency-key-collision = "df4a456a9c5782f09ed9230a936fe918214c08f966f11dfa504a746b1efd65b3"
+project-approval-authorization = "54a625f1d473e43fe0333671c903b16216578203754b8a76b28d97bf2eeaeaf3"
+timezone-boundary-error = "f90bdbe8c481740fb308a6eccfc6c35d4f1e1cdec8ced86108a91c43758edac4"
+
+[frozen_workflows.baseline]
+prompt_sha256 = "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576"
+adapter_sha256 = "0584c74ea183bbc0e1faf6a7dd078b360eb22cad5e6e5cec94cc3bc430c0c0fd"
+config_sha256 = "e7c610dc14a814ed1e588c9ed1fe165a3148002e2a8901ab41a0ac53aa33f052"
+
+[frozen_workflows.advanced-v2]
+prompt_sha256 = "dc2bd36a8c8040c82646ff95d133150a6e36c1262660a1d19847a711bc94b810"
+adapter_sha256 = "0f99b8d13e9713006b808f18d4fb3c2c00cac29907ad6d5b03c09b393236e347"
+config_sha256 = "afe26caff65f818a775ada26cd9bc1a81d557e9cfcd426235b3eac1708c29822"
+validator_sha256 = "5596c8365c4f52da618bef4257415aa309690bf6d8f7f3d9dcbe00cc300887ec"
+recorder_sha256 = "007e4f563584dff6319694fa057f2a2ee845263ae9149d050f79febd5eb3757e"
+output_schema_sha256 = "6b5c0175994e085ff9ad83d1e61c8f85a3db77cc88227aed655ce3cefe3f5002"

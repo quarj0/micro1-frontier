@@ -23,13 +23,13 @@ def _parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest="action", required=True)
 
     list_cases = subparsers.add_parser("list-cases", help="List benchmark cases")
-    list_cases.add_argument("--suite", choices=["dev", "heldout"], default="dev")
+    list_cases.add_argument("--suite", choices=["dev", "heldout", "final"], default="dev")
 
     run = subparsers.add_parser(
         "run", help="Run one case through an agent and evaluator"
     )
     run.add_argument("case")
-    run.add_argument("--suite", choices=["dev", "heldout"], default="dev")
+    run.add_argument("--suite", choices=["dev", "heldout", "final"], default="dev")
     run.add_argument(
         "--agent-command",
         required=True,
@@ -64,7 +64,7 @@ def _parser() -> argparse.ArgumentParser:
     )
 
     suite = subparsers.add_parser("run-suite", help="Run every case in a suite")
-    suite.add_argument("--suite", choices=["dev", "heldout"], default="dev")
+    suite.add_argument("--suite", choices=["dev", "heldout", "final"], default="dev")
     suite.add_argument("--agent-command", required=True)
     suite.add_argument(
         "--mode", choices=[mode.value for mode in ExecutionMode], default="docker"

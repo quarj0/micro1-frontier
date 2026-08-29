@@ -1,0 +1,3 @@
+root_cause_symbols = ["api.views.ChargeCreateView.post"]
+required_property = "idempotency identity is scoped to the resolved tenant while same-tenant retries remain stable"
+forbidden_behavior = "one tenant can replay or receive another tenant's charge by reusing its idempotency key"
