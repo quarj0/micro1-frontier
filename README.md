@@ -1,236 +1,112 @@
 # Agentic API Regression Investigator
 
-An evidence-backed benchmark for agents that investigate and repair Django REST Framework API regressions. The intended user is a backend engineer who needs more than a plausible patch: they need a reproduced symptom, a causal explanation, a targeted repair, and verification evidence they can review.
+ARI is a benchmark and workflow for evidence-backed repair of Django REST Framework regressions.
 
-This initial scaffold proves the complete benchmark loop:
+The experiment's central result is deliberately narrower than “agents fix bugs better”:
 
-```text
-broken repository -> issue report -> baseline agent -> patch
-                  -> host evaluator -> metrics -> report
-```
+> A general-purpose coding agent repaired all four final unseen regressions, but none of those repairs qualified as independently auditable. ARI V2 preserved the same 4/4 repair success while producing 4/4 evidence chains grounded in actual execution events.
 
-The development suite currently contains three synthetic cases:
+Both workflows used Codex CLI 0.150.1, `gpt-5.6-sol`, medium reasoning, one agent, and the same repository tools. The measured difference came from workflow and evidence transport, not a model upgrade.
 
-- Response contract drift.
-- Incorrect boolean filtering.
-- Nested-write atomicity failure.
+## Final result
 
-## Setup
+| Workflow | Verified repairs | Evidence-backed repairs | Runtime | Input / cached / output / reasoning tokens | Retries |
+|---|---:|---:|---:|---:|---:|
+| Baseline | 4/4 | 0/4 | 398.229s | 660,493 / 548,864 / 10,437 / 1,938 | 0 |
+| Advanced V2 | 4/4 | 4/4 | 1,186.559s | 584,132 / 434,944 / 12,339 / 3,606 | 0 |
 
-Python 3.12 and [uv](https://docs.astral.sh/uv/) are required. Docker is additionally required for official isolated runs.
+Source: the committed, machine-generated [final comparison](benchmark/comparisons/final-v1.json). The final cases were tenant-scoped idempotency keys, timezone/DST day boundaries, multipart upload parsing, and project-scoped expense approval authorization.
+
+V2 did not improve verified repair rate in the final suite; both workflows repaired every case. It changed auditability. The tradeoff was runtime: aggregate V2 runtime was 2.98 times baseline. One V2 idempotency run took 836.059s and dominates that total; it succeeded without a retry. The experiment did not produce API-key billing data, so this repository makes no dollar-cost claim.
+
+## What “evidence-backed” means
+
+The host evaluator determines whether a patch repairs the hidden behavior. Evidence qualification is separate.
+
+V2 requires the agent to reference recorder-issued command event IDs. Each event binds:
+
+- a unique ID and workflow phase;
+- exact argv, timestamp, and execution order;
+- exit status;
+- stdout/stderr hashes and retained excerpts;
+- whether it ran before or after the first source edit;
+- the patch state present during verification.
+
+The adapter resolves those references against matching receipts in the raw Codex JSONL trajectory. Qualification checks that reproduction and diagnosis evidence are pre-edit, focused and broad verification are distinct passing post-edit executions, and verification ran against the reported patch. The hidden evaluator still runs afterward, outside the agent workspace.
+
+## Experiment stages
+
+The stages below must not be blended; they answer different questions.
+
+### 1. Development results
+
+Three public development regressions proved the end-to-end loop: response contract drift, boolean filtering, and nested-write atomicity.
+
+| Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
+|---|---:|---:|---:|---:|
+| Baseline | 3/3 | 0/3 | 327.454s | 673,681 / 568,320 / 8,610 / 1,961 |
+| Advanced V1 | 3/3 | 3/3 | 259.503s | 363,763 / 282,624 / 10,312 / 1,905 |
+
+Source: [advanced-v1-development.json](benchmark/comparisons/advanced-v1-development.json). These were development cases, not final evaluation.
+
+### 2. V1 hard-case tuning results
+
+The harder four-case suite covered tenant exposure, unstable cursor pagination, query-count growth, and tenant cache contamination. The frozen baseline and V1 both repaired every case, but neither produced a qualifying evidence chain.
+
+| Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
+|---|---:|---:|---:|---:|
+| Baseline | 4/4 | 0/4 | 374.252s | 610,689 / 485,888 / 10,665 / 2,806 |
+| Advanced V1 | 4/4 | 0/4 | 480.772s | 538,502 / 442,880 / 19,036 / 3,733 |
+
+Source: [heldout-v1.json](benchmark/comparisons/heldout-v1.json). Classification: development-only subprocess evaluation.
+
+### 3. V2 tuning results
+
+V2 changed evidence transport and qualification, not the repair sequence, model, reasoning level, tools, or retry limit. On the same four hard cases, V2 preserved 4/4 repair success and raised evidence qualification from 0/4 to 4/4.
+
+| Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
+|---|---:|---:|---:|---:|
+| Advanced V1 | 4/4 | 0/4 | 480.772s | 538,502 / 442,880 / 19,036 / 3,733 |
+| Advanced V2 | 4/4 | 4/4 | 372.759s | 539,143 / 426,752 / 11,851 / 3,128 |
+
+Source: [advanced-v2-heldout-tuning.json](benchmark/comparisons/advanced-v2-heldout-tuning.json). V2 runtime was 22.5% lower than V1 in this tuning comparison. This was still development/tuning, not the final unseen suite.
+
+### 4. Final unseen evaluation
+
+The final suite was independently validated and frozen at commit `1298a75` before either workflow ran. Every broken input passed its intended visible tests, failed its intended hidden evaluator, and passed that evaluator after a minimal repair in a disposable copy. Baseline and V2 then ran exactly once per case with fresh state.
+
+The final result is the headline result above: 4/4 verified for both workflows; 0/4 evidence-backed for baseline and 4/4 for V2. Exact run IDs, report hashes, per-case usage, and aggregate metrics are in [final-v1.json](benchmark/comparisons/final-v1.json). The independent preflight is in [final-v1-preflight.json](benchmark/validations/final-v1-preflight.json).
+
+## Trust boundary and execution limitation
+
+Docker mode is the benchmark's intended official isolation boundary. It mounts only the case workspace, defaults the network to disabled, uses a read-only container root, and runs the hidden evaluator on the host only after the agent exits.
+
+The reported model experiments were run in subprocess mode because no `CODEX_API_KEY` was available. Each invocation still received a fresh temporary repository and ephemeral Codex home, and the evaluator was added only after the agent finished. However, subprocess mode is not a security boundary: the command inherits the host environment and may be able to read beyond its workspace. Therefore these results are accurately classified as development/tuning or evaluator-separated final one-shot results, not official Docker-isolated API-key results.
+
+## Quick start
+
+Requirements: Python 3.12 and [uv](https://docs.astral.sh/uv/). Docker is additionally required for isolated runs.
 
 ```bash
 uv sync --frozen
-uv run ari list-cases
-```
-
-Dependencies are pinned in `pyproject.toml` and resolved in `uv.lock`. The cases use only synthetic data and make no external requests.
-
-## Agent command contract
-
-The harness invokes any command supplied through `--agent-command`; no provider SDK is part of the core workflow. The command starts in the broken repository workspace and receives:
-
-| Variable | Meaning |
-|---|---|
-| `ARI_WORKSPACE` | Absolute writable workspace path. |
-| `ARI_PROMPT_PATH` | Baseline instruction and issue report. |
-| `ARI_TRAJECTORY_PATH` | Optional JSONL trajectory output path. |
-| `ARI_EXECUTION_MODE` | `docker` for official isolation or `subprocess` for development. |
-| `ARI_USAGE_PATH` | Optional normalized usage JSON output path. |
-| `ARI_FINAL_RESPONSE_PATH` | Optional final natural-language response path. |
-| `ARI_EVIDENCE_PATH` | Optional validated workflow-evidence JSONL path. |
-| `ARI_WORKFLOW` | Selected workflow: `baseline`, `advanced-v1`, or `advanced-v2`. |
-
-The harness captures stdout, stderr, exit status, launch errors, hard timeouts, runtime, Git patch, changed paths, and trajectory events. An agent may modify only the workspace presented to it.
-
-## Official Docker mode
-
-Docker is the default and official benchmark mode. The container receives one writable mount at `/workspace`; evaluators, oracles, hidden tests, other cases, the host repository, and the Docker socket are not mounted. Network access is disabled unless `--allow-network` is explicitly supplied.
-
-Build the deterministic smoke-test image and prove the loop:
-
-```bash
-docker build -f Dockerfile.smoke-agent -t ari-smoke-agent:dev .
-uv run ari run-suite \
-  --mode docker \
-  --docker-image ari-smoke-agent:dev \
-  --agent-command smoke
-```
-
-The smoke agent is a harness test double, not a benchmark baseline, and its results must not be reported as agent performance. A real agent image should contain its own command and any runtime dependencies, then be invoked using the same interface:
-
-```bash
-uv run ari run response-contract-drift \
-  --mode docker \
-  --docker-image your-agent-image:fixed-version \
-  --agent-command 'your-agent --prompt "$ARI_PROMPT_PATH"'
-```
-
-Commands are passed directly, not through a shell. Environment-variable expansion in the example therefore needs to be performed by the agent command itself or by an explicit shell entrypoint inside the image.
-
-## Real Codex baseline
-
-The first credible baseline is one Codex CLI agent with one simple instruction. It fixes these controls for the baseline and later workflow variants:
-
-- Codex CLI `0.150.1`.
-- `gpt-5.6-sol`.
-- Medium reasoning.
-- No subagents, memories, skill discovery, plugins, apps, retry orchestration, evidence gate, or independent verifier.
-
-The adapter invokes a fresh `codex exec --json --ephemeral` turn, captures the raw JSONL stream and final response, and normalizes the `turn.completed` token usage. API-key runs also receive a clearly labeled cost estimate from the versioned pricing snapshot in `agents/codex-baseline/pricing.json`.
-
-Build the pinned baseline image:
-
-```bash
-docker build -f Dockerfile.codex-baseline -t ari-codex-baseline:0.150.1 .
-```
-
-Set a project-scoped `CODEX_API_KEY` in the invoking shell without writing it into this repository, then run:
-
-```bash
-uv run ari run-suite \
-  --mode docker \
-  --docker-image ari-codex-baseline:0.150.1 \
-  --agent-command codex-baseline \
-  --allow-network \
-  --secret-env CODEX_API_KEY \
-  --timeout 900
-```
-
-`--secret-env` adds only the variable name to Docker argv. Docker inherits its value from the harness process; the value is not included in the report, trajectory, image, or workspace. The synthetic repository can still execute code inside the container, so use a scoped benchmark key with an appropriate spend limit.
-
-Every Docker baseline run starts with an empty temporary `CODEX_HOME`, ignores user configuration and execution rules, disables stateful or multi-agent features, and persists no Codex session. The only host mount remains the prepared case workspace.
-
-For a non-isolated development check, the same adapter can reuse authentication shared by the host Codex CLI and VS Code extension:
-
-```bash
-uv run ari run response-contract-drift \
-  --mode subprocess \
-  --agent-command "$(pwd)/.venv/bin/python $(pwd)/agents/codex-baseline/adapter.py" \
-  --timeout 900
-```
-
-Do not report subprocess results as official benchmark evidence.
-
-## Advanced evidence workflow
-
-`advanced-v1` keeps the baseline's Codex CLI, GPT-5.6 Sol Medium model, disabled features, repository tools, cases, evaluator, and resource limits. It changes only the workflow:
-
-- Reproduce the reported behavior with a failing command before source edits.
-- Ground the diagnosis in pre-edit repository or runtime command output.
-- Make a targeted production repair.
-- Run distinct focused and broader regression verification commands.
-- Abstain when the evidence is insufficient.
-- Permit at most one new agent turn, and only after a corroborated verification failure.
-
-Agent-authored evidence does not qualify merely because it uses the expected labels. The adapter checks reported commands, exit codes, and exact output lines against raw Codex command events and enforces pre-edit/post-edit ordering. Raw model JSONL remains separate from normalized evidence JSONL.
-
-Build and run the official isolated variant with the same scoped key mechanism:
-
-```bash
-docker build -f Dockerfile.codex-advanced -t ari-codex-advanced:0.150.1 .
-uv run ari run-suite \
-  --workflow advanced-v1 \
-  --mode docker \
-  --docker-image ari-codex-advanced:0.150.1 \
-  --agent-command codex-advanced \
-  --allow-network \
-  --secret-env CODEX_API_KEY \
-  --timeout 900
-```
-
-The equivalent development-only command is:
-
-```bash
-uv run ari run-suite \
-  --workflow advanced-v1 \
-  --mode subprocess \
-  --agent-command "$(pwd)/.venv/bin/python $(pwd)/agents/codex_advanced/adapter.py" \
-  --timeout 900
-```
-
-The promoted development comparison is generated from an explicit list of run IDs:
-
-```bash
-python scripts/generate_comparison.py
-python scripts/generate_comparison.py --check
-```
-
-See [the machine-readable artifact](benchmark/comparisons/advanced-v1-development.json) and [its generated aggregate table](benchmark/comparisons/advanced-v1-development.md). Existing private run outputs are read but never changed by the generator.
-
-### Advanced v2 structured evidence
-
-`advanced-v2` retains the V1 repair sequence, GPT-5.6 Sol Medium model, tool access, and one verification-triggered retry. It changes evidence transport and qualification only. Evidence-bearing commands run through `ari-evidence`, which records phase, command, ordering and timestamps, exit status, output hashes and excerpts, and whether execution occurred before or after the first source edit. The final response cites event IDs; the adapter validates those IDs against receipts retained in the raw Codex JSONL trajectory and against the resulting patch.
-
-Run V2 in development-only subprocess mode with:
-
-```bash
-uv run --frozen ari run-suite \
-  --suite heldout \
-  --workflow advanced-v2 \
-  --mode subprocess \
-  --agent-command "$(pwd)/.venv/bin/python $(pwd)/agents/codex_advanced_v2/adapter.py" \
-  --timeout 900
-```
-
-For an official isolated run, build `Dockerfile.codex-advanced-v2` and use the same secret-forwarding pattern documented for V1. Agent containers remain network-disabled unless explicitly opted in; OpenAI API execution requires the same narrowly scoped network exception as the earlier workflows.
-
-The four-case development/tuning results are recorded in the [machine-generated V1-vs-V2 artifact](benchmark/comparisons/advanced-v2-heldout-tuning.json) and its [aggregate table](benchmark/comparisons/advanced-v2-heldout-tuning.md). The original held-out V1 comparison remains immutable.
-
-### Final unseen evaluation
-
-The frozen `final-v1` suite covers tenant-scoped idempotency keys, timezone and DST day boundaries, multipart upload parsing, and same-tenant project-scoped approval authorization. Its independent preflight is recorded in [`benchmark/validations/final-v1-preflight.json`](benchmark/validations/final-v1-preflight.json). The exact one-shot baseline and Advanced V2 run selection, per-run report hashes, usage, patches, and aggregate metrics are in the [machine-generated final comparison](benchmark/comparisons/final-v1.json) and [Markdown table](benchmark/comparisons/final-v1.md).
-
-These runs used fresh ephemeral Codex state in subprocess mode because no `CODEX_API_KEY` was available. They are evaluator-separated final one-shot results, but not Docker-isolated official API-key runs.
-
-## Held-out suite
-
-The `heldout` suite currently covers cross-tenant object exposure, unstable cursor traversal with tied sort values, serializer-driven query-count growth, and cross-tenant cache contamination:
-
-```bash
+uv run pytest
+uv run ari list-cases --suite dev
 uv run ari list-cases --suite heldout
-uv run ari run-suite \
-  --suite heldout \
-  --workflow advanced-v1 \
-  --mode docker \
-  --docker-image ari-codex-advanced:0.150.1 \
-  --agent-command codex-advanced \
-  --allow-network \
-  --secret-env CODEX_API_KEY \
-  --timeout 900
+uv run ari list-cases --suite final
 ```
 
-The suite manifest freezes prompt, adapter, and model-control hashes before evaluation. See [heldout-v1 results](benchmark/comparisons/heldout-v1.md) and the corresponding [machine-readable artifact](benchmark/comparisons/heldout-v1.json).
+The core harness is provider-neutral: `--agent-command` invokes any adapter implementing the environment contract. Dependencies are pinned, cases use synthetic data, and generated workspaces make no external requests.
 
-## Development-only subprocess mode
+For exact artifact checks and new isolated replications, use the [reproduction guide](docs/reproduction.md). Do not describe a new stochastic run as reproduction of an existing run ID.
 
-Subprocess mode is faster but **not isolated**. The command inherits the host environment and may be able to traverse beyond its workspace. Never use subprocess results as official benchmark evidence.
+## Repository guide
 
-```bash
-uv run ari run-suite \
-  --mode subprocess \
-  --agent-command "$(pwd)/.venv/bin/python $(pwd)/tests/fixtures/smoke_agent.py"
-```
+- [Final results summary](docs/final-results.md)
+- [Improvement changelog](docs/improvement-changelog.md)
+- [Exact reproduction guide](docs/reproduction.md)
+- [Trajectory submission index](docs/trajectory-index.md)
+- [Five-minute demo outline](docs/demo-outline.md)
+- [Benchmark and trust-boundary design](docs/benchmark-design.md)
+- [Hackathon brief, preserved unchanged](docs/micro1%20-%20First%20Hackathon97ce7c5.pdf)
 
-## Outputs
-
-Every run writes ignored artifacts beneath:
-
-```text
-benchmark/results/<run-id>/
-├── report.json
-├── report.md
-├── patch.diff
-├── agent.stdout.log
-├── agent.stderr.log
-├── evaluator.stdout.log
-├── evaluator.stderr.log
-├── evidence.jsonl           # advanced workflow only
-└── final-response.md        # when supplied by the adapter
-
-trajectories/<run-id>.jsonl
-```
-
-Generated results and trajectories remain outside Git unless representative artifacts are intentionally reviewed and promoted later.
-
-See [benchmark design](docs/benchmark-design.md) and the [reproduction guide](docs/reproduction.md) for the trust boundary and complete workflow.
+Every run writes ignored raw reports, patches, logs, evidence, and trajectories beneath `benchmark/results/<run-id>/` and `trajectories/`. Committed comparison artifacts are generated mechanically from explicit run-ID specifications and include SHA-256 hashes of their source reports.

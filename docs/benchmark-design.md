@@ -1,50 +1,17 @@
-# Development benchmark design
+# Benchmark design and trust boundary
 
 ## Purpose
 
-The development suite validates the benchmark machinery and provides public cases for improving an evidence-disciplined workflow. It is not the final held-out evaluation set.
+ARI evaluates two separate outcomes for Django REST Framework regression repair:
 
-The `heldout-v1` suite adds four harder cases covering object-level tenant isolation, tied-value cursor traversal, bounded ORM query counts, and tenant-aware caching. Its manifest records hashes for both prompts, adapters, and model-control files before evaluation. Agent workspaces contain the case input only; suite metadata, oracles, evaluator code, other cases, and construction notes stay outside the sandbox.
+1. **Verified repair:** does a host-side hidden evaluator accept the patched repository?
+2. **Evidence-backed repair:** does a verified patch also carry a validated reproduction, diagnosis, and verification chain grounded in commands that actually ran?
 
-Each case contains a standalone broken Django/DRF repository with its own pinned `pyproject.toml` and `uv.lock`, a realistic issue report, synthetic data, ordinary visible tests, and a separate evaluator. The agent is expected to establish the failure, locate its cause, make a production-code repair, and leave reviewable evidence.
+This separation matters because the final baseline repaired every regression while qualifying no evidence chain. ARI V2 preserved the same repair result and qualified every chain. See [final-results.md](final-results.md) for the measurements.
 
-## Trust boundary
+## Case structure
 
-```text
-Host repository
-├── case/input/ ---------- copied ----------> isolated /workspace
-└── case/evaluator/ -- not mounted --> [agent container cannot see it]
-                                            |
-                                            v exits
-                                      host evaluator runs
-```
-
-Docker mode provides the official isolation boundary:
-
-- Only the prepared case workspace is mounted.
-- The container root filesystem is read-only.
-- The workspace mount is writable.
-- Network defaults to `none`.
-- Images are never pulled implicitly during a timed run; the selected image must already exist locally.
-- Linux capabilities are dropped and privilege escalation is disabled.
-- The Docker socket, host repository, evaluator, oracle, and other cases are absent.
-- A hard timeout kills the named container.
-
-The evaluator runs as a host process only after the agent container has terminated. Hidden tests are then copied temporarily into the workspace, executed with the pinned root environment, and removed.
-
-Subprocess mode provides no security boundary and exists only for rapid harness development.
-
-## Fixed model control
-
-The baseline and all later workflow variants use Codex CLI 0.150.1 with `gpt-5.6-sol` at medium reasoning. Model and reasoning level are controlled variables: workflow changes must not alter them. Official Codex runs also use a fresh, ephemeral `CODEX_HOME`, ignore user configuration and rules, and disable multi-agent, memory, plugin, app, and skill-discovery features.
-
-`advanced-v1` remains one agent. It adds ordered reproduction, diagnosis, targeted repair, focused verification, broader regression verification, explicit abstention, and one controller-granted retry after corroborated verification failure. Each turn is ephemeral; a retry receives the prior structured evidence and current workspace but no hidden evaluator information.
-
-`advanced-v2` preserves that repair workflow while replacing free-text corroboration with structured command events. The recorder assigns an opaque event ID and retains the phase, argv, timestamps/order, exit code, stdout/stderr hashes and bounded excerpts, edit state, and patch state at execution. Qualification resolves final-response references against recorder records and matching receipts in raw Codex command events. It checks pre-edit reproduction and diagnosis, post-edit focused and broad verification ordering, exit statuses, and that verification ran against the reported patch. The evaluator still runs only after the agent sandbox exits and remains unavailable to the workflow.
-
-The hosted model requires an explicit `--allow-network` exception. Credentials are forwarded by environment-variable name at runtime and never written into the repository, workspace, image, trajectory, or report. Case repositories contain only controlled synthetic code and data.
-
-## Case layout
+Each case is a standalone broken Django/DRF repository with pinned dependencies, a synthetic issue report and data, visible tests, and a separate hidden evaluator.
 
 ```text
 case-id/
@@ -57,18 +24,111 @@ case-id/
     └── tests/
 ```
 
-`oracle.toml` records causal targets for later evidence scoring. The current verified-repair metric is behavioral: hidden tests and the visible suite must pass. Automated diagnosis-quality scoring will be added only after its rubric is validated; the scaffold does not claim that a green test suite alone proves evidence quality.
+The agent-facing input never includes `evaluator/`, hidden tests, the oracle, other cases, or case-construction notes.
 
-## Current cases
+## Trust boundary
 
-| Case | Failure mechanism | Adjacent behavior protected by hidden tests |
-|---|---|---|
-| Response contract drift | Serializer output field renamed | Exact shape and non-exposure of internal data |
-| Incorrect boolean filtering | Nonempty strings coerced with `bool()` | True, false, case handling, omission, and invalid input |
-| Nested-write atomicity | Parent saved before later nested validation fails | Rollback of parent and earlier children; valid commit |
+```text
+Host repository
+├── case/input/ ---------- copied ----------> agent /workspace
+└── case/evaluator/ -- withheld -----------> host evaluator after agent exit
+```
 
-## Current primary metric
+Docker mode is the intended official boundary:
 
-The scaffold reports `verified_repair` when the host-side evaluator exits successfully. The suite aggregate reports verified repairs divided by attempted cases.
+- only the prepared case workspace is mounted;
+- the container root filesystem is read-only;
+- the workspace is writable;
+- network defaults to `none`;
+- images are not pulled during a timed run;
+- Linux capabilities are dropped and privilege escalation is disabled;
+- the Docker socket, host repository, evaluator, oracle, and other cases are absent;
+- a hard timeout terminates the named container.
 
-The advanced development metric requires structured reproduction, diagnosis, and verification events that the adapter has corroborated against raw completed command events. Reproduction and causal evidence must precede the first source edit; focused and broader passing commands must follow it and be distinct. The external evaluator still determines behavioral repair. Accepted causal localization against hidden oracle targets and generalized forbidden-test-weakening checks remain future held-out-evaluation work.
+The host copies hidden tests into the workspace only after the agent process exits, runs the evaluator, and removes those tests.
+
+Subprocess mode uses a fresh temporary workspace and, for the Codex adapters, a fresh ephemeral `CODEX_HOME`. It does not provide filesystem or environment isolation. All committed measured model comparisons used subprocess mode because no API key was available, so they must not be represented as Docker-isolated results.
+
+## Controlled model and tools
+
+Baseline, V1, and V2 use:
+
+- Codex CLI 0.150.1;
+- `gpt-5.6-sol`;
+- medium reasoning;
+- one agent;
+- the same repository inspection, editing, and test tools;
+- disabled multi-agent, memory, plugin, app, and skill-discovery features.
+
+The baseline receives a simple repair instruction and one fresh Codex turn.
+
+V1 changes the workflow by requiring pre-edit reproduction and diagnosis evidence, targeted repair, focused and broad verification, abstention, and at most one verification-triggered retry. V1 links evidence by comparing agent-authored command/output records with raw command events.
+
+V2 preserves V1's repair sequence and controls but replaces free-text evidence linkage with structured recorder event IDs.
+
+## V2 command evidence
+
+Every evidence-bearing V2 command runs through `ari-evidence`, which records:
+
+- event ID and phase: reproduction, investigation, focused verification, or broad verification;
+- argv and display command;
+- start/finish timestamps and monotonic order;
+- exit status;
+- SHA-256 hashes and bounded excerpts for stdout and stderr;
+- before-edit, after-edit, or edit-spanning state;
+- changed files present before and after execution.
+
+The recorder emits a receipt into the raw command output. The adapter accepts a cited event only when the recorder record, digest, receipt, raw Codex command event, and exit status agree.
+
+For a successful evidence chain, qualification requires:
+
+- a cited failing reproduction event before the first source edit;
+- a non-empty diagnosis citing corroborated pre-edit reproduction/investigation events;
+- reported repair files that match the Git patch, including a production file;
+- a cited passing focused verification after editing;
+- a distinct, later, passing broad verification after editing;
+- verification events whose recorded patch state contains the reported repair files.
+
+The hidden evaluator then independently determines behavioral correctness.
+
+## Benchmark stages and cases
+
+### Development suite
+
+- Response contract drift.
+- Incorrect boolean filtering.
+- Nested-write atomicity failure.
+
+These public cases established and debugged the complete benchmark loop and V1 workflow.
+
+### V1 hard-case and V2 tuning suite
+
+- Cross-tenant data exposure.
+- Unstable cursor pagination.
+- Query-count regression.
+- Cross-tenant cache contamination.
+
+The workflow hashes were frozen for the V1 comparison. The same cases then served as V2 development/tuning cases; they are not the final unseen evaluation.
+
+### Final unseen suite
+
+- Idempotency-key collision.
+- Timezone boundary error.
+- File-upload parser regression.
+- Project-scoped approval authorization.
+
+Before execution, every broken repository was independently checked for visible-test behavior and intended hidden-evaluator failure; every evaluator was also validated against a minimal repair in a disposable copy. Case-tree and workflow hashes were frozen at commit `1298a75`. Baseline and V2 then ran exactly once per case.
+
+## Metrics and reports
+
+`verified_repair` is true when the host evaluator exits successfully.
+
+`evidence_backed_repair` is true only when the evaluator passes and validated evidence contains reproduction, diagnosis, and verification event types.
+
+Every run report also records process state, exit code, runtime, patch, changed files, trajectory parsing, evidence parsing, and normalized token usage when available. Comparison artifacts are generated from explicit run-ID specs and include source report SHA-256 values.
+
+No automated metric claims that a passing patch is minimal, production-ready, or generally correct beyond the protected behavior. No committed measurement supplies API-key dollar cost.
+
+## Experiment immutability
+
+The experiment is complete. Existing workflows, cases, evaluators, suite manifests, run selections, and comparison artifacts are historical controls. Further research should introduce new version names and new suites instead of tuning these frozen stages.
