@@ -242,7 +242,9 @@ def validate_evidence(
         if isinstance(raw_ids, list):
             diagnosis_ids = [event_id for event_id in raw_ids if isinstance(event_id, str)]
             diagnosis_records = [records[event_id] for event_id in diagnosis_ids if event_id in records]
-    if not diagnosis_ids or len(diagnosis_records) != len(diagnosis_ids):
+    if len(set(diagnosis_ids)) != len(diagnosis_ids):
+        errors.append("diagnosis contains duplicate evidence event references")
+    elif not diagnosis_ids or len(diagnosis_records) != len(diagnosis_ids):
         errors.append("diagnosis references missing or uncorroborated evidence events")
     elif any(
         record.get("edit_state") != PRE_EDIT
