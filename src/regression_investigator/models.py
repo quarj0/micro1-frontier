@@ -18,6 +18,7 @@ class Workflow(StrEnum):
 
     BASELINE = "baseline"
     ADVANCED_V1 = "advanced-v1"
+    ADVANCED_V2 = "advanced-v2"
 
 
 class ProcessState(StrEnum):

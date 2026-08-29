@@ -21,7 +21,7 @@
     "case_id": {"type": "string"},
     "suite": {"enum": ["dev", "heldout"]},
     "mode": {"enum": ["docker", "subprocess"]},
-    "workflow": {"enum": ["baseline", "advanced-v1"]},
+    "workflow": {"enum": ["baseline", "advanced-v1", "advanced-v2"]},
     "patch": {"type": "string"},
     "patch_files": {"type": "array", "items": {"type": "string"}},
     "trajectory_events": {"type": "integer", "minimum": 0},

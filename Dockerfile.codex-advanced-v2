@@ -1,0 +1,36 @@
+FROM node:24.18.1-bookworm-slim@sha256:235600a8101ab264e117b1768e925532262668dc9b581ef1dd7d96ced463b8e7 AS codex-cli
+
+RUN npm install --global @openai/codex@0.150.1
+
+FROM python:3.12-slim-bookworm@sha256:0f5b26b9518d002b6173fd61daad821fa340635ebfec5bba471013f9ca114579
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends git ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && pip install --no-cache-dir uv==0.11.26
+
+COPY --from=codex-cli /usr/local/bin/node /usr/local/bin/node
+COPY --from=codex-cli /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -s /usr/local/lib/node_modules/@openai/codex/bin/codex.js /usr/local/bin/codex
+
+COPY agents/codex-baseline/runtime/ /opt/ari-runtime/
+RUN UV_PROJECT_ENVIRONMENT=/opt/ari-venv uv sync \
+    --project /opt/ari-runtime \
+    --frozen \
+    --no-install-project
+
+COPY agents/codex-baseline/config.json /opt/ari/agents/codex-baseline/config.json
+COPY agents/codex-baseline/pricing.json /opt/ari/agents/codex-baseline/pricing.json
+COPY agents/codex_advanced_v2/ /opt/ari/agents/codex_advanced_v2/
+RUN chmod 0555 /opt/ari/agents/codex_advanced_v2/adapter.py \
+    /opt/ari/agents/codex_advanced_v2/ari-evidence \
+    && ln -s /opt/ari/agents/codex_advanced_v2/adapter.py /usr/local/bin/codex-advanced-v2 \
+    && ln -s /opt/ari/agents/codex_advanced_v2/ari-evidence /usr/local/bin/ari-evidence
+
+ENV PATH="/opt/ari-venv/bin:/usr/local/bin:/usr/bin:/bin" \
+    CODEX_HOME="/tmp/codex-home" \
+    UV_CACHE_DIR="/tmp/uv-cache" \
+    UV_PROJECT_ENVIRONMENT="/opt/ari-venv" \
+    PYTHONDONTWRITEBYTECODE="1"
+
+WORKDIR /workspace

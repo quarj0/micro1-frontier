@@ -23,6 +23,11 @@ FROZEN_PROMPT_HASHES = {
     "baseline.md": "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576",
     "advanced-v1.md": "7fa8137acb6c98e26bbbb6f25512678d5098333378b0e4193bd5f41363583927",
 }
+FROZEN_HELDOUT_V1_ARTIFACT_HASHES = {
+    "heldout-v1.json": "54e006068cfa7de9e74e6cfa6c5d3fac99a3cba7bde1d4423112a8c609ffcb25",
+    "heldout-v1.md": "37736b5810120927412b1b1e67ffb59f404704c82e13647d8570361ee147bb0a",
+    "heldout-v1.spec.json": "ffa73016fc92d9fb7d3c0280827fc98991476a79b50de011163034aa81d71b78",
+}
 
 
 def isolated_benchmark_root(tmp_path: Path) -> Path:
@@ -69,6 +74,33 @@ def test_workflow_prompts_are_frozen_during_heldout_evaluation():
     for name, expected in FROZEN_PROMPT_HASHES.items():
         actual = hashlib.sha256((PROJECT_ROOT / "prompts" / name).read_bytes()).hexdigest()
         assert actual == expected
+
+
+def test_advanced_v1_heldout_comparison_is_immutable():
+    import hashlib
+
+    comparison_dir = PROJECT_ROOT / "benchmark" / "comparisons"
+    for name, expected in FROZEN_HELDOUT_V1_ARTIFACT_HASHES.items():
+        assert hashlib.sha256((comparison_dir / name).read_bytes()).hexdigest() == expected
+
+
+def test_advanced_v2_keeps_v1_model_tools_and_retry_limit():
+    import json
+
+    v1 = json.loads(
+        (PROJECT_ROOT / "agents" / "codex_advanced" / "config.json").read_text()
+    )
+    v2 = json.loads(
+        (PROJECT_ROOT / "agents" / "codex_advanced_v2" / "config.json").read_text()
+    )
+    for field in (
+        "codex_cli_version",
+        "model",
+        "reasoning_effort",
+        "disabled_features",
+        "maximum_retries",
+    ):
+        assert v2[field] == v1[field]
 
 
 def test_heldout_manifest_freezes_complete_workflow_controls():

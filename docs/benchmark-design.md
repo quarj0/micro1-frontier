@@ -40,6 +40,8 @@ The baseline and all later workflow variants use Codex CLI 0.150.1 with `gpt-5.6
 
 `advanced-v1` remains one agent. It adds ordered reproduction, diagnosis, targeted repair, focused verification, broader regression verification, explicit abstention, and one controller-granted retry after corroborated verification failure. Each turn is ephemeral; a retry receives the prior structured evidence and current workspace but no hidden evaluator information.
 
+`advanced-v2` preserves that repair workflow while replacing free-text corroboration with structured command events. The recorder assigns an opaque event ID and retains the phase, argv, timestamps/order, exit code, stdout/stderr hashes and bounded excerpts, edit state, and patch state at execution. Qualification resolves final-response references against recorder records and matching receipts in raw Codex command events. It checks pre-edit reproduction and diagnosis, post-edit focused and broad verification ordering, exit statuses, and that verification ran against the reported patch. The evaluator still runs only after the agent sandbox exits and remains unavailable to the workflow.
+
 The hosted model requires an explicit `--allow-network` exception. Credentials are forwarded by environment-variable name at runtime and never written into the repository, workspace, image, trajectory, or report. Case repositories contain only controlled synthetic code and data.
 
 ## Case layout

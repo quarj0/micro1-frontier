@@ -39,7 +39,7 @@ The harness invokes any command supplied through `--agent-command`; no provider 
 | `ARI_USAGE_PATH` | Optional normalized usage JSON output path. |
 | `ARI_FINAL_RESPONSE_PATH` | Optional final natural-language response path. |
 | `ARI_EVIDENCE_PATH` | Optional validated workflow-evidence JSONL path. |
-| `ARI_WORKFLOW` | Selected workflow: `baseline` or `advanced-v1`. |
+| `ARI_WORKFLOW` | Selected workflow: `baseline`, `advanced-v1`, or `advanced-v2`. |
 
 The harness captures stdout, stderr, exit status, launch errors, hard timeouts, runtime, Git patch, changed paths, and trajectory events. An agent may modify only the workspace presented to it.
 
@@ -157,6 +157,23 @@ python scripts/generate_comparison.py --check
 ```
 
 See [the machine-readable artifact](benchmark/comparisons/advanced-v1-development.json) and [its generated aggregate table](benchmark/comparisons/advanced-v1-development.md). Existing private run outputs are read but never changed by the generator.
+
+### Advanced v2 structured evidence
+
+`advanced-v2` retains the V1 repair sequence, GPT-5.6 Sol Medium model, tool access, and one verification-triggered retry. It changes evidence transport and qualification only. Evidence-bearing commands run through `ari-evidence`, which records phase, command, ordering and timestamps, exit status, output hashes and excerpts, and whether execution occurred before or after the first source edit. The final response cites event IDs; the adapter validates those IDs against receipts retained in the raw Codex JSONL trajectory and against the resulting patch.
+
+Run V2 in development-only subprocess mode with:
+
+```bash
+uv run --frozen ari run-suite \
+  --suite heldout \
+  --workflow advanced-v2 \
+  --mode subprocess \
+  --agent-command "$(pwd)/.venv/bin/python $(pwd)/agents/codex_advanced_v2/adapter.py" \
+  --timeout 900
+```
+
+For an official isolated run, build `Dockerfile.codex-advanced-v2` and use the same secret-forwarding pattern documented for V1. Agent containers remain network-disabled unless explicitly opted in; OpenAI API execution requires the same narrowly scoped network exception as the earlier workflows.
 
 ## Held-out suite
 

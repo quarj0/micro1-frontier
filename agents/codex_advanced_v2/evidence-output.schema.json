@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "reproduction_event_id",
+    "diagnosis",
+    "repair",
+    "focused_verification_event_id",
+    "broad_verification_event_id",
+    "abstention_reason"
+  ],
+  "properties": {
+    "status": {"enum": ["repaired", "verification_failed", "abstained"]},
+    "reproduction_event_id": {"type": ["string", "null"]},
+    "diagnosis": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hypothesis", "evidence_event_ids"],
+          "properties": {
+            "hypothesis": {"type": "string", "minLength": 1},
+            "evidence_event_ids": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "repair": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "files"],
+          "properties": {
+            "summary": {"type": "string", "minLength": 1},
+            "files": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "focused_verification_event_id": {"type": ["string", "null"]},
+    "broad_verification_event_id": {"type": ["string", "null"]},
+    "abstention_reason": {"type": ["string", "null"]}
+  }
+}
