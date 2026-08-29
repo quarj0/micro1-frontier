@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "comparison_id": "final-v1",
+  "title": "Final unseen one-shot baseline vs Advanced v2 evaluation",
+  "controls_manifest": "benchmark/cases/final/suite.toml",
+  "execution_mode": "subprocess",
+  "classification": "final unseen one-shot evaluation with fresh ephemeral Codex state; evaluator-separated but not Docker-isolated because CODEX_API_KEY was unavailable",
+  "selection_policy": "All and only the single completed post-freeze run for each workflow and final-v1 case. No case or workflow was rerun after an observed agent result. Raw reports, trajectories, patches, failures, and successes are preserved in their original run directories.",
+  "control_hashes": {
+    "suite_freeze_commit": "1298a7551f5b9bddb86fbd6c64de0fb50b430f2b",
+    "baseline_prompt_sha256": "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576",
+    "baseline_adapter_sha256": "0584c74ea183bbc0e1faf6a7dd078b360eb22cad5e6e5cec94cc3bc430c0c0fd",
+    "baseline_config_sha256": "e7c610dc14a814ed1e588c9ed1fe165a3148002e2a8901ab41a0ac53aa33f052",
+    "advanced_v2_prompt_sha256": "dc2bd36a8c8040c82646ff95d133150a6e36c1262660a1d19847a711bc94b810",
+    "advanced_v2_adapter_sha256": "0f99b8d13e9713006b808f18d4fb3c2c00cac29907ad6d5b03c09b393236e347",
+    "advanced_v2_config_sha256": "afe26caff65f818a775ada26cd9bc1a81d557e9cfcd426235b3eac1708c29822",
+    "advanced_v2_validator_sha256": "5596c8365c4f52da618bef4257415aa309690bf6d8f7f3d9dcbe00cc300887ec",
+    "advanced_v2_recorder_sha256": "007e4f563584dff6319694fa057f2a2ee845263ae9149d050f79febd5eb3757e",
+    "advanced_v2_output_schema_sha256": "6b5c0175994e085ff9ad83d1e61c8f85a3db77cc88227aed655ce3cefe3f5002"
+  },
+  "workflows": {
+    "baseline": [
+      "20260829T143555Z-file-upload-parser-regression-27a4bbcd",
+      "20260829T143752Z-idempotency-key-collision-d93b525f",
+      "20260829T143903Z-project-approval-authorization-867f97f7",
+      "20260829T144039Z-timezone-boundary-error-484c6afd"
+    ],
+    "advanced-v2": [
+      "20260829T144434Z-file-upload-parser-regression-43cc4f2c",
+      "20260829T144641Z-idempotency-key-collision-4ac99df2",
+      "20260829T151102Z-project-approval-authorization-26f807af",
+      "20260829T151246Z-timezone-boundary-error-5804a2d4"
+    ]
+  }
+}

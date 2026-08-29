@@ -1,0 +1,218 @@
+{
+  "aggregate": [
+    {
+      "cached_input_tokens": 548864,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 0,
+      "input_tokens": 660493,
+      "output_tokens": 10437,
+      "reasoning_output_tokens": 1938,
+      "retry_count": 0,
+      "runtime_seconds": 398.228749,
+      "verified_repairs": 4,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 434944,
+      "cases": 4,
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repairs": 4,
+      "input_tokens": 584132,
+      "output_tokens": 12339,
+      "reasoning_output_tokens": 3606,
+      "retry_count": 0,
+      "runtime_seconds": 1186.558721,
+      "verified_repairs": 4,
+      "workflow": "advanced-v2"
+    }
+  ],
+  "classification": "final unseen one-shot evaluation with fresh ephemeral Codex state; evaluator-separated but not Docker-isolated because CODEX_API_KEY was unavailable",
+  "comparison_id": "final-v1",
+  "control_hashes": {
+    "advanced_v2_adapter_sha256": "0f99b8d13e9713006b808f18d4fb3c2c00cac29907ad6d5b03c09b393236e347",
+    "advanced_v2_config_sha256": "afe26caff65f818a775ada26cd9bc1a81d557e9cfcd426235b3eac1708c29822",
+    "advanced_v2_output_schema_sha256": "6b5c0175994e085ff9ad83d1e61c8f85a3db77cc88227aed655ce3cefe3f5002",
+    "advanced_v2_prompt_sha256": "dc2bd36a8c8040c82646ff95d133150a6e36c1262660a1d19847a711bc94b810",
+    "advanced_v2_recorder_sha256": "007e4f563584dff6319694fa057f2a2ee845263ae9149d050f79febd5eb3757e",
+    "advanced_v2_validator_sha256": "5596c8365c4f52da618bef4257415aa309690bf6d8f7f3d9dcbe00cc300887ec",
+    "baseline_adapter_sha256": "0584c74ea183bbc0e1faf6a7dd078b360eb22cad5e6e5cec94cc3bc430c0c0fd",
+    "baseline_config_sha256": "e7c610dc14a814ed1e588c9ed1fe165a3148002e2a8901ab41a0ac53aa33f052",
+    "baseline_prompt_sha256": "e4cee059ccea31823e639b80823b371af8294c1c89533d1451117251f63b7576",
+    "suite_freeze_commit": "1298a7551f5b9bddb86fbd6c64de0fb50b430f2b"
+  },
+  "controls_manifest": "benchmark/cases/final/suite.toml",
+  "execution_mode": "subprocess",
+  "rows": [
+    {
+      "cached_input_tokens": 166912,
+      "case_id": "file-upload-parser-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 193578,
+      "output_tokens": 2477,
+      "reasoning_output_tokens": 579,
+      "retry_count": 0,
+      "run_id": "20260829T143555Z-file-upload-parser-regression-27a4bbcd",
+      "runtime_seconds": 116.36403538400009,
+      "source_report": "benchmark/results/20260829T143555Z-file-upload-parser-regression-27a4bbcd/report.json",
+      "source_report_sha256": "caca5cba4dfb2bf24405b71158c84e4baea9d6e906fcdc357a4e748eb84133f6",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 104448,
+      "case_id": "idempotency-key-collision",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 141840,
+      "output_tokens": 2001,
+      "reasoning_output_tokens": 380,
+      "retry_count": 0,
+      "run_id": "20260829T143752Z-idempotency-key-collision-d93b525f",
+      "runtime_seconds": 70.16804516399998,
+      "source_report": "benchmark/results/20260829T143752Z-idempotency-key-collision-d93b525f/report.json",
+      "source_report_sha256": "c6f15f3a9cd79ff9f092b0a65905c7ffa743bea5bed83d353b90086d62d08cca",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 133632,
+      "case_id": "project-approval-authorization",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 154099,
+      "output_tokens": 2669,
+      "reasoning_output_tokens": 527,
+      "retry_count": 0,
+      "run_id": "20260829T143903Z-project-approval-authorization-867f97f7",
+      "runtime_seconds": 95.34729625400041,
+      "source_report": "benchmark/results/20260829T143903Z-project-approval-authorization-867f97f7/report.json",
+      "source_report_sha256": "463cec32c7dcca66c0367ace27453745f75a7f94e71a08be1a975f91fadafb24",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 143872,
+      "case_id": "timezone-boundary-error",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": false,
+      "input_tokens": 170976,
+      "output_tokens": 3290,
+      "reasoning_output_tokens": 452,
+      "retry_count": 0,
+      "run_id": "20260829T144039Z-timezone-boundary-error-484c6afd",
+      "runtime_seconds": 116.3493717829997,
+      "source_report": "benchmark/results/20260829T144039Z-timezone-boundary-error-484c6afd/report.json",
+      "source_report_sha256": "ead1128adcc5464103c69deeb1d2f89b87d4e2ba66e1bc0d62e860eca6b70ddb",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "baseline"
+    },
+    {
+      "cached_input_tokens": 105728,
+      "case_id": "file-upload-parser-regression",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 147318,
+      "output_tokens": 2834,
+      "reasoning_output_tokens": 724,
+      "retry_count": 0,
+      "run_id": "20260829T144434Z-file-upload-parser-regression-43cc4f2c",
+      "runtime_seconds": 126.27767015900008,
+      "source_report": "benchmark/results/20260829T144434Z-file-upload-parser-regression-43cc4f2c/report.json",
+      "source_report_sha256": "05a561e54a3b67336e94d846f5fc0eba53603705d586572930a762625e7ab676",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 121856,
+      "case_id": "idempotency-key-collision",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 145513,
+      "output_tokens": 2889,
+      "reasoning_output_tokens": 914,
+      "retry_count": 0,
+      "run_id": "20260829T144641Z-idempotency-key-collision-4ac99df2",
+      "runtime_seconds": 836.0587969529997,
+      "source_report": "benchmark/results/20260829T144641Z-idempotency-key-collision-4ac99df2/report.json",
+      "source_report_sha256": "baadd30956d2106150c9fab8f954f8805857e47a538643d6f57768ff04918287",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 102656,
+      "case_id": "project-approval-authorization",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 145062,
+      "output_tokens": 2823,
+      "reasoning_output_tokens": 913,
+      "retry_count": 0,
+      "run_id": "20260829T151102Z-project-approval-authorization-26f807af",
+      "runtime_seconds": 103.57169879700086,
+      "source_report": "benchmark/results/20260829T151102Z-project-approval-authorization-26f807af/report.json",
+      "source_report_sha256": "604f0ea80c3575006a9de6dab4a2db292e64d2302da2e4051202a1c51a0a3c04",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    },
+    {
+      "cached_input_tokens": 104704,
+      "case_id": "timezone-boundary-error",
+      "changed_files": [
+        "api/tests.py",
+        "api/views.py"
+      ],
+      "evidence_backed_repair": true,
+      "input_tokens": 146239,
+      "output_tokens": 3793,
+      "reasoning_output_tokens": 1055,
+      "retry_count": 0,
+      "run_id": "20260829T151246Z-timezone-boundary-error-5804a2d4",
+      "runtime_seconds": 120.65055555299932,
+      "source_report": "benchmark/results/20260829T151246Z-timezone-boundary-error-5804a2d4/report.json",
+      "source_report_sha256": "b3e5ee329a44ae5c4bd86c35d3990495fff1db80094c479169599e3eea409b95",
+      "suite": "final",
+      "verified_repair": true,
+      "workflow": "advanced-v2"
+    }
+  ],
+  "schema_version": "1.0",
+  "selection_policy": "All and only the single completed post-freeze run for each workflow and final-v1 case. No case or workflow was rerun after an observed agent result. Raw reports, trajectories, patches, failures, and successes are preserved in their original run directories.",
+  "source_spec": "benchmark/comparisons/final-v1.spec.json",
+  "title": "Final unseen one-shot baseline vs Advanced v2 evaluation"
+}

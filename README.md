@@ -177,6 +177,12 @@ For an official isolated run, build `Dockerfile.codex-advanced-v2` and use the s
 
 The four-case development/tuning results are recorded in the [machine-generated V1-vs-V2 artifact](benchmark/comparisons/advanced-v2-heldout-tuning.json) and its [aggregate table](benchmark/comparisons/advanced-v2-heldout-tuning.md). The original held-out V1 comparison remains immutable.
 
+### Final unseen evaluation
+
+The frozen `final-v1` suite covers tenant-scoped idempotency keys, timezone and DST day boundaries, multipart upload parsing, and same-tenant project-scoped approval authorization. Its independent preflight is recorded in [`benchmark/validations/final-v1-preflight.json`](benchmark/validations/final-v1-preflight.json). The exact one-shot baseline and Advanced V2 run selection, per-run report hashes, usage, patches, and aggregate metrics are in the [machine-generated final comparison](benchmark/comparisons/final-v1.json) and [Markdown table](benchmark/comparisons/final-v1.md).
+
+These runs used fresh ephemeral Codex state in subprocess mode because no `CODEX_API_KEY` was available. They are evaluator-separated final one-shot results, but not Docker-isolated official API-key runs.
+
 ## Held-out suite
 
 The `heldout` suite currently covers cross-tenant object exposure, unstable cursor traversal with tied sort values, serializer-driven query-count growth, and cross-tenant cache contamination:
