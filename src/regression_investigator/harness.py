@@ -11,7 +11,7 @@ from pathlib import Path
 
 from .evaluator import evaluate_workspace
 from .metrics import calculate_metrics
-from .models import AgentInvocation, ExecutionMode, RunReport
+from .models import AgentInvocation, ExecutionMode, RunReport, Workflow
 from .reporting import write_report
 from .runner import run_agent
 from .workflows.baseline import render_baseline_prompt
@@ -120,6 +120,7 @@ def run_case(
     case_id: str,
     command: tuple[str, ...],
     mode: ExecutionMode,
+    workflow: Workflow = Workflow.BASELINE,
     timeout_seconds: int,
     docker_image: str | None,
     allow_network: bool = False,
@@ -141,7 +142,7 @@ def run_case(
         workspace, prompt_path, baseline_revision = _prepare_workspace(
             case_dir,
             temp_path,
-            root / "prompts" / "baseline.md",
+            root / "prompts" / f"{workflow.value}.md",
         )
         trajectory_path = workspace / ".ari" / "trajectory.jsonl"
         agent = run_agent(
@@ -152,6 +153,7 @@ def run_case(
                 trajectory_path=trajectory_path,
                 timeout_seconds=timeout_seconds,
                 mode=mode,
+                workflow=workflow,
                 docker_image=docker_image,
                 allow_network=allow_network,
                 secret_environment=secret_environment,
@@ -163,6 +165,8 @@ def run_case(
             workspace, "diff", "--name-only", baseline_revision
         ).splitlines()
         trajectory, trajectory_error = _load_trajectory(trajectory_path)
+        evidence_path = workspace / ".ari" / "evidence.jsonl"
+        evidence, evidence_error = _load_trajectory(evidence_path)
         usage, usage_error = _load_json_object(workspace / ".ari" / "usage.json")
         final_response_path = workspace / ".ari" / "final-response.md"
         final_response = (
@@ -182,12 +186,13 @@ def run_case(
             list(evaluator_config["command"]),
             int(evaluator_config.get("timeout_seconds", 60)),
         )
-        metrics = calculate_metrics(agent, evaluator, changed, trajectory, usage)
+        metrics = calculate_metrics(agent, evaluator, changed, evidence, usage)
         report = RunReport(
             schema_version="1.0",
             run_id=run_id,
             case_id=case_id,
             mode=mode.value,
+            workflow=workflow.value,
             started_at=datetime.now(UTC).isoformat(),
             agent=agent,
             evaluator=evaluator,
@@ -195,6 +200,8 @@ def run_case(
             patch_files=changed,
             trajectory_events=len(trajectory),
             trajectory_error=trajectory_error,
+            evidence=evidence,
+            evidence_error=evidence_error,
             usage=usage,
             usage_error=usage_error,
             final_response=final_response,

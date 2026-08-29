@@ -37,7 +37,7 @@ Expected result:
 incorrect-boolean-filtering: PASS
 nested-write-atomicity: PASS
 response-contract-drift: PASS
-{"cases": 3, "verified_repair_rate": 1.0, "verified_repairs": 3}
+{"cases": 3, "evidence_backed_repair_rate": 0.0, "evidence_backed_repairs": 0, "verified_repair_rate": 1.0, "verified_repairs": 3}
 ```
 
 The ordering is lexical. Runtime depends on Docker startup, but each development evaluator has a 60-second hard timeout. The smoke image makes no network calls and has no model cost.
@@ -66,3 +66,21 @@ uv run ari run-suite \
 ```
 
 The adapter is intentionally minimal. It reads the existing baseline prompt, runs one fresh non-interactive Codex turn, tees the raw JSONL trajectory, captures the final response, and extracts usage. It does not add workflow logic.
+
+## Advanced workflow
+
+Use the separate image, command, and workflow selector against the same case suite:
+
+```bash
+docker build -f Dockerfile.codex-advanced -t ari-codex-advanced:0.150.1 .
+uv run ari run-suite \
+  --workflow advanced-v1 \
+  --mode docker \
+  --docker-image ari-codex-advanced:0.150.1 \
+  --agent-command codex-advanced \
+  --allow-network \
+  --secret-env CODEX_API_KEY \
+  --timeout 900
+```
+
+For fair comparisons, change only `--workflow`, `--docker-image`, and `--agent-command`. Keep the case suite, timeout, CLI version, model, reasoning effort, and network policy fixed. The advanced adapter writes raw Codex events to the trajectory and separately writes only corroborated semantic events to `evidence.jsonl`. A retry is a second ephemeral turn with the same controls and is allowed at most once after recorded verification failure.

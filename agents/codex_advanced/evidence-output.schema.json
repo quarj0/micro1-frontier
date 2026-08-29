@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "reproduction",
+    "diagnosis",
+    "repair",
+    "focused_verification",
+    "regression_verification",
+    "abstention_reason"
+  ],
+  "properties": {
+    "status": {
+      "enum": ["repaired", "verification_failed", "abstained"]
+    },
+    "reproduction": {
+      "anyOf": [
+        {"$ref": "#/$defs/execution"},
+        {"type": "null"}
+      ]
+    },
+    "diagnosis": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hypothesis", "evidence"],
+          "properties": {
+            "hypothesis": {"type": "string", "minLength": 1},
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"$ref": "#/$defs/observed_execution"}
+            }
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "repair": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["summary", "files"],
+          "properties": {
+            "summary": {"type": "string", "minLength": 1},
+            "files": {
+              "type": "array",
+              "minItems": 1,
+              "items": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "focused_verification": {
+      "anyOf": [
+        {"$ref": "#/$defs/execution"},
+        {"type": "null"}
+      ]
+    },
+    "regression_verification": {
+      "anyOf": [
+        {"$ref": "#/$defs/execution"},
+        {"type": "null"}
+      ]
+    },
+    "abstention_reason": {
+      "type": ["string", "null"]
+    }
+  },
+  "$defs": {
+    "observed_execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "observed"],
+      "properties": {
+        "command": {"type": "string", "minLength": 1},
+        "observed": {"type": "string", "minLength": 1}
+      }
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "observed", "exit_code"],
+      "properties": {
+        "command": {"type": "string", "minLength": 1},
+        "observed": {"type": "string", "minLength": 1},
+        "exit_code": {"type": "integer"}
+      }
+    }
+  }
+}

@@ -13,7 +13,7 @@ from .harness import (
     run_case,
 )
 from .metrics import aggregate_reports
-from .models import ExecutionMode
+from .models import ExecutionMode, Workflow
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -35,6 +35,11 @@ def _parser() -> argparse.ArgumentParser:
     )
     run.add_argument(
         "--mode", choices=[mode.value for mode in ExecutionMode], default="docker"
+    )
+    run.add_argument(
+        "--workflow",
+        choices=[workflow.value for workflow in Workflow],
+        default=Workflow.BASELINE.value,
     )
     run.add_argument("--docker-image", help="Required in Docker mode")
     run.add_argument("--timeout", type=int, default=300)
@@ -60,6 +65,11 @@ def _parser() -> argparse.ArgumentParser:
     suite.add_argument("--agent-command", required=True)
     suite.add_argument(
         "--mode", choices=[mode.value for mode in ExecutionMode], default="docker"
+    )
+    suite.add_argument(
+        "--workflow",
+        choices=[workflow.value for workflow in Workflow],
+        default=Workflow.BASELINE.value,
     )
     suite.add_argument("--docker-image")
     suite.add_argument("--timeout", type=int, default=300)
@@ -94,6 +104,7 @@ def main(argv: list[str] | None = None) -> int:
         if not command:
             raise BenchmarkConfigurationError("agent command cannot be empty")
         mode = ExecutionMode(args.mode)
+        workflow = Workflow(args.workflow)
 
         if args.action == "run":
             report = run_case(
@@ -101,6 +112,7 @@ def main(argv: list[str] | None = None) -> int:
                 case_id=args.case,
                 command=command,
                 mode=mode,
+                workflow=workflow,
                 timeout_seconds=args.timeout,
                 docker_image=args.docker_image,
                 allow_network=args.allow_network,
@@ -118,6 +130,7 @@ def main(argv: list[str] | None = None) -> int:
                 case_id=case_id,
                 command=command,
                 mode=mode,
+                workflow=workflow,
                 timeout_seconds=args.timeout,
                 docker_image=args.docker_image,
                 allow_network=args.allow_network,

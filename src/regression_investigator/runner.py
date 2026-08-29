@@ -88,6 +88,7 @@ def _contract_environment(
             else str(invocation.trajectory_path)
         ),
         "ARI_EXECUTION_MODE": invocation.mode.value,
+        "ARI_WORKFLOW": invocation.workflow.value,
         "ARI_USAGE_PATH": (
             f"{workspace}/.ari/usage.json"
             if workspace == "/workspace"
@@ -97,6 +98,11 @@ def _contract_environment(
             f"{workspace}/.ari/final-response.md"
             if workspace == "/workspace"
             else str(invocation.workspace / ".ari" / "final-response.md")
+        ),
+        "ARI_EVIDENCE_PATH": (
+            f"{workspace}/.ari/evidence.jsonl"
+            if workspace == "/workspace"
+            else str(invocation.workspace / ".ari" / "evidence.jsonl")
         ),
         **invocation.environment,
     }

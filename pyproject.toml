@@ -27,4 +27,4 @@ packages = ["src/regression_investigator"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
-
+pythonpath = ["."]

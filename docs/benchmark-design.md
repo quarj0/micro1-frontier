@@ -36,6 +36,8 @@ Subprocess mode provides no security boundary and exists only for rapid harness 
 
 The baseline and all later workflow variants use Codex CLI 0.150.1 with `gpt-5.6-sol` at medium reasoning. Model and reasoning level are controlled variables: workflow changes must not alter them. Official Codex runs also use a fresh, ephemeral `CODEX_HOME`, ignore user configuration and rules, and disable multi-agent, memory, plugin, app, and skill-discovery features.
 
+`advanced-v1` remains one agent. It adds ordered reproduction, diagnosis, targeted repair, focused verification, broader regression verification, explicit abstention, and one controller-granted retry after corroborated verification failure. Each turn is ephemeral; a retry receives the prior structured evidence and current workspace but no hidden evaluator information.
+
 The hosted model requires an explicit `--allow-network` exception. Credentials are forwarded by environment-variable name at runtime and never written into the repository, workspace, image, trajectory, or report. Case repositories contain only controlled synthetic code and data.
 
 ## Case layout
@@ -65,4 +67,4 @@ case-id/
 
 The scaffold reports `verified_repair` when the host-side evaluator exits successfully. The suite aggregate reports verified repairs divided by attempted cases.
 
-This is an initial engineering metric. Before final evaluation, the full evidence-backed definition must also enforce structured reproduction evidence, accepted causal localization, no forbidden test weakening, and claim-to-execution traceability.
+The advanced development metric requires structured reproduction, diagnosis, and verification events that the adapter has corroborated against raw completed command events. Reproduction and causal evidence must precede the first source edit; focused and broader passing commands must follow it and be distinct. The external evaluator still determines behavioral repair. Accepted causal localization against hidden oracle targets and generalized forbidden-test-weakening checks remain future held-out-evaluation work.

@@ -13,6 +13,13 @@ class ExecutionMode(StrEnum):
     SUBPROCESS = "subprocess"
 
 
+class Workflow(StrEnum):
+    """Agent workflow variant under evaluation."""
+
+    BASELINE = "baseline"
+    ADVANCED_V1 = "advanced-v1"
+
+
 class ProcessState(StrEnum):
     """Normalized terminal states for agent and evaluator processes."""
 
@@ -37,6 +44,7 @@ class AgentInvocation:
     trajectory_path: Path
     timeout_seconds: int
     mode: ExecutionMode
+    workflow: Workflow = Workflow.BASELINE
     docker_image: str | None = None
     allow_network: bool = False
     secret_environment: tuple[str, ...] = ()
@@ -65,6 +73,7 @@ class RunReport:
     run_id: str
     case_id: str
     mode: str
+    workflow: str
     started_at: str
     agent: ProcessResult
     evaluator: EvaluationResult
@@ -72,6 +81,8 @@ class RunReport:
     patch_files: list[str]
     trajectory_events: int
     trajectory_error: str | None
+    evidence: list[dict[str, Any]]
+    evidence_error: str | None
     usage: dict[str, Any] | None
     usage_error: str | None
     final_response: str | None

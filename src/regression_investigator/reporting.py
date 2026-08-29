@@ -25,17 +25,25 @@ def write_report(report: RunReport, output_dir: Path) -> None:
         (output_dir / "final-response.md").write_text(
             report.final_response, encoding="utf-8"
         )
+    if report.evidence:
+        (output_dir / "evidence.jsonl").write_text(
+            "".join(json.dumps(event, sort_keys=True) + "\n" for event in report.evidence),
+            encoding="utf-8",
+        )
 
     status = "PASS" if report.evaluator.passed else "FAIL"
     markdown = f"""# Benchmark run: {report.case_id}
 
 - Run: `{report.run_id}`
 - Mode: `{report.mode}`
+- Workflow: `{report.workflow}`
 - Agent state: `{report.agent.state}` ({report.agent.runtime_seconds:.3f}s)
 - Evaluator: **{status}** ({report.evaluator.runtime_seconds:.3f}s)
 - Changed files: {len(report.patch_files)}
 - Trajectory events: {report.trajectory_events}
 - Trajectory error: {report.trajectory_error or "none"}
+- Evidence events: {len(report.evidence)}
+- Evidence error: {report.evidence_error or "none"}
 - Usage error: {report.usage_error or "none"}
 
 ## Usage

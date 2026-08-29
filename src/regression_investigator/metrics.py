@@ -9,10 +9,16 @@ def calculate_metrics(
     agent: ProcessResult,
     evaluator: EvaluationResult,
     patch_files: list[str],
-    trajectory: list[dict[str, Any]],
+    evidence: list[dict[str, Any]],
     usage: dict[str, Any] | None,
 ) -> dict[str, object]:
-    event_types = {str(event.get("type")) for event in trajectory}
+    validated_events = [
+        event
+        for event in evidence
+        if isinstance(event.get("evidence"), dict)
+        and event["evidence"].get("validated") is True
+    ]
+    event_types = {str(event.get("type")) for event in validated_events}
     evidence_chain_complete = {
         "reproduction",
         "diagnosis",
@@ -41,8 +47,13 @@ def calculate_metrics(
 def aggregate_reports(reports: list[dict[str, object]]) -> dict[str, object]:
     total = len(reports)
     repaired = sum(bool(report["metrics"]["verified_repair"]) for report in reports)  # type: ignore[index]
+    evidence_backed = sum(
+        bool(report["metrics"]["evidence_backed_repair"]) for report in reports  # type: ignore[index]
+    )
     return {
         "cases": total,
+        "evidence_backed_repairs": evidence_backed,
+        "evidence_backed_repair_rate": evidence_backed / total if total else 0.0,
         "verified_repairs": repaired,
         "verified_repair_rate": repaired / total if total else 0.0,
     }
