@@ -1,0 +1,47 @@
+diff --git a/api/tests.py b/api/tests.py
+index a6c995e..3d4b544 100644
+--- a/api/tests.py
++++ b/api/tests.py
+@@ -19,3 +19,29 @@ class ProjectDetailSmokeTests(APITestCase):
+
+         self.assertEqual(response.status_code, 200)
+         self.assertEqual(response.json()["name"], "Synthetic Project")
++
++    def test_tenant_cannot_retrieve_another_tenants_project(self):
++        requesting_tenant = Tenant.objects.create(name="Requesting Tenant")
++        owning_tenant = Tenant.objects.create(name="Owning Tenant")
++        project = Project.objects.create(
++            tenant=owning_tenant,
++            name="Private Project",
++            confidential_summary="private summary",
++        )
++
++        response = self.client.get(
++            f"/api/projects/{project.pk}/",
++            HTTP_X_TENANT_ID=str(requesting_tenant.pk),
++        )
++
++        self.assertEqual(response.status_code, 404)
++
++    def test_nonexistent_project_returns_not_found(self):
++        tenant = Tenant.objects.create(name="Synthetic Tenant")
++
++        response = self.client.get(
++            "/api/projects/999999/",
++            HTTP_X_TENANT_ID=str(tenant.pk),
++        )
++
++        self.assertEqual(response.status_code, 404)
+diff --git a/api/views.py b/api/views.py
+index e41ffcc..ba6d34e 100644
+--- a/api/views.py
++++ b/api/views.py
+@@ -17,6 +17,6 @@ def request_tenant_id(request):
+
+ class ProjectDetailView(APIView):
+     def get(self, request, project_id):
+-        request_tenant_id(request)
+-        project = get_object_or_404(Project, pk=project_id)
++        tenant_id = request_tenant_id(request)
++        project = get_object_or_404(Project, pk=project_id, tenant_id=tenant_id)
+         return Response(ProjectSerializer(project).data)

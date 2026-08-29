@@ -1,0 +1,48 @@
+diff --git a/api/tests.py b/api/tests.py
+index 6c2f4cd..28f5f02 100644
+--- a/api/tests.py
++++ b/api/tests.py
+@@ -29,3 +29,31 @@ class ExpenseApprovalSmokeTests(APITestCase):
+         self.assertEqual(response.status_code, 200)
+         self.assertEqual(response.json()["status"], Expense.APPROVED)
+         self.assertEqual(response.json()["approved_by"], manager.pk)
++
++    def test_manager_cannot_approve_sibling_project_expense(self):
++        tenant = Tenant.objects.create(name="Synthetic Tenant")
++        manager = StaffUser.objects.create(tenant=tenant, name="Synthetic Manager")
++        managed_project = Project.objects.create(tenant=tenant, name="Managed Project")
++        sibling_project = Project.objects.create(tenant=tenant, name="Sibling Project")
++        ProjectMembership.objects.create(
++            project=managed_project,
++            user=manager,
++            role=ProjectMembership.MANAGER,
++        )
++        expense = Expense.objects.create(
++            tenant=tenant,
++            project=sibling_project,
++            description="Synthetic expense",
++            amount_cents=5000,
++        )
++
++        response = self.client.post(
++            f"/api/expenses/{expense.pk}/approve/",
++            HTTP_X_TENANT_ID=str(tenant.pk),
++            HTTP_X_USER_ID=str(manager.pk),
++        )
++
++        self.assertEqual(response.status_code, 403)
++        expense.refresh_from_db()
++        self.assertEqual(expense.status, Expense.PENDING)
++        self.assertIsNone(expense.approved_by)
+diff --git a/api/views.py b/api/views.py
+index c1bde51..b27c160 100644
+--- a/api/views.py
++++ b/api/views.py
+@@ -24,6 +24,7 @@ class ExpenseApprovalView(APIView):
+         expense = get_object_or_404(Expense, pk=expense_id, tenant=tenant)
+         can_approve = ProjectMembership.objects.filter(
+             user=user,
++            project=expense.project,
+             role=ProjectMembership.MANAGER,
+         ).exists()
+         if not can_approve:

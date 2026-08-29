@@ -1,0 +1,264 @@
+{
+  "agent": {
+    "command": [
+      "<REPOSITORY>/.venv/bin/python",
+      "<REPOSITORY>/agents/codex_advanced_v2/adapter.py"
+    ],
+    "error": null,
+    "exit_code": 0,
+    "runtime_seconds": 86.52137063499868,
+    "state": "succeeded",
+    "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/ari-codex-home-88ke1jm3\"))\n",
+    "stdout": "{\"type\":\"thread.started\",\"thread_id\":\"01a04da1-f041-71a1-a8ee-1b4bc8b8b797\"}\n{\"type\":\"turn.started\"}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_0\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":null,\\\"diagnosis\\\":null,\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"I\u2019m beginning with repository discovery, then I\u2019ll record a deterministic failing reproduction before making any edits.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_1\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"pwd && rg --files -g '\\\"'!*.pyc'\\\"' | sed -n '1,160p'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_1\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"pwd && rg --files -g '\\\"'!*.pyc'\\\"' | sed -n '1,160p'\\\"\",\"aggregated_output\":\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace\\nISSUE.md\\npyproject.toml\\nconfig/urls.py\\nconfig/__init__.py\\nconfig/settings.py\\napi/serializers.py\\napi/urls.py\\napi/__init__.py\\napi/models.py\\napi/views.py\\napi/tests.py\\nuv.lock\\nmanage.py\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_2\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"sed -n '1,240p' api/models.py && sed -n '1,280p' api/tests.py && sed -n '1,240p' api/views.py && sed -n '1,160p' api/urls.py && sed -n '1,220p' config/settings.py\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_2\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"sed -n '1,240p' api/models.py && sed -n '1,280p' api/tests.py && sed -n '1,240p' api/views.py && sed -n '1,160p' api/urls.py && sed -n '1,220p' config/settings.py\\\"\",\"aggregated_output\":\"from django.db import models\\n\\n\\nclass Tenant(models.Model):\\n    name = models.CharField(max_length=80)\\n\\n\\nclass Project(models.Model):\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    name = models.CharField(max_length=120)\\n    confidential_summary = models.CharField(max_length=200)\\nfrom rest_framework.test import APITestCase\\n\\nfrom .models import Project, Tenant\\n\\n\\nclass ProjectDetailSmokeTests(APITestCase):\\n    def test_tenant_can_retrieve_its_project(self):\\n        tenant = Tenant.objects.create(name=\\\"Synthetic Tenant\\\")\\n        project = Project.objects.create(\\n            tenant=tenant,\\n            name=\\\"Synthetic Project\\\",\\n            confidential_summary=\\\"synthetic summary\\\",\\n        )\\n\\n        response = self.client.get(\\n            f\\\"/api/projects/{project.pk}/\\\",\\n            HTTP_X_TENANT_ID=str(tenant.pk),\\n        )\\n\\n        self.assertEqual(response.status_code, 200)\\n        self.assertEqual(response.json()[\\\"name\\\"], \\\"Synthetic Project\\\")\\nfrom django.shortcuts import get_object_or_404\\nfrom rest_framework.exceptions import ValidationError\\nfrom rest_framework.response import Response\\nfrom rest_framework.views import APIView\\n\\nfrom .models import Project\\nfrom .serializers import ProjectSerializer\\n\\n\\ndef request_tenant_id(request):\\n    raw_tenant_id = request.headers.get(\\\"X-Tenant-ID\\\")\\n    try:\\n        return int(raw_tenant_id)\\n    except (TypeError, ValueError) as exc:\\n        raise ValidationError({\\\"tenant\\\": \\\"A numeric X-Tenant-ID header is required.\\\"}) from exc\\n\\n\\nclass ProjectDetailView(APIView):\\n    def get(self, request, project_id):\\n        request_tenant_id(request)\\n        project = get_object_or_404(Project, pk=project_id)\\n        return Response(ProjectSerializer(project).data)\\nfrom django.urls import path\\n\\nfrom .views import ProjectDetailView\\n\\nurlpatterns = [\\n    path(\\\"projects/<int:project_id>/\\\", ProjectDetailView.as_view(), name=\\\"project-detail\\\")\\n]\\nSECRET_KEY = \\\"synthetic-benchmark-only\\\"\\nDEBUG = False\\nROOT_URLCONF = \\\"config.urls\\\"\\nALLOWED_HOSTS = [\\\"testserver\\\"]\\nINSTALLED_APPS = [\\n    \\\"django.contrib.auth\\\",\\n    \\\"django.contrib.contenttypes\\\",\\n    \\\"rest_framework\\\",\\n    \\\"api\\\",\\n]\\nDATABASES = {\\\"default\\\": {\\\"ENGINE\\\": \\\"django.db.backends.sqlite3\\\", \\\"NAME\\\": \\\":memory:\\\"}}\\nMIGRATION_MODULES = {\\\"api\\\": None}\\nDEFAULT_AUTO_FIELD = \\\"django.db.models.BigAutoField\\\"\\nUSE_TZ = True\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_3\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":null,\\\"diagnosis\\\":null,\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"Repository discovery found a Django API with an existing same-tenant smoke test. I\u2019m now recording a direct cross-tenant request that exits non-zero specifically if the endpoint returns anything other than 404.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_4\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- python manage.py shell -c 'from django.core.management import call_command; call_command(\\\\\\\"migrate\\\\\\\", run_syncdb=True, verbosity=0); from rest_framework.test import APIClient; from api.models import Tenant, Project; alpha=Tenant.objects.create(name=\\\\\\\"Alpha\\\\\\\"); beta=Tenant.objects.create(name=\\\\\\\"Beta\\\\\\\"); project=Project.objects.create(tenant=beta, name=\\\\\\\"Beta Project\\\\\\\", confidential_summary=\\\\\\\"beta secret\\\\\\\"); response=APIClient().get(f\\\\\\\"/api/projects/{project.pk}/\\\\\\\", HTTP_X_TENANT_ID=str(alpha.pk)); assert response.status_code == 404, f\\\\\\\"cross-tenant request returned {response.status_code}: {response.json()}\\\\\\\"'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_4\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- python manage.py shell -c 'from django.core.management import call_command; call_command(\\\\\\\"migrate\\\\\\\", run_syncdb=True, verbosity=0); from rest_framework.test import APIClient; from api.models import Tenant, Project; alpha=Tenant.objects.create(name=\\\\\\\"Alpha\\\\\\\"); beta=Tenant.objects.create(name=\\\\\\\"Beta\\\\\\\"); project=Project.objects.create(tenant=beta, name=\\\\\\\"Beta Project\\\\\\\", confidential_summary=\\\\\\\"beta secret\\\\\\\"); response=APIClient().get(f\\\\\\\"/api/projects/{project.pk}/\\\\\\\", HTTP_X_TENANT_ID=str(alpha.pk)); assert response.status_code == 404, f\\\\\\\"cross-tenant request returned {response.status_code}: {response.json()}\\\\\\\"'\\\"\",\"aggregated_output\":\"6 objects imported automatically (use -v 2 for details).\\n\\nTraceback (most recent call last):\\n  File \\\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/manage.py\\\", line 10, in <module>\\n    execute_from_command_line(sys.argv)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\\\", line 442, in execute_from_command_line\\n    utility.execute()\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\\\", line 436, in execute\\n    self.fetch_command(subcommand).run_from_argv(self.argv)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\\\", line 416, in run_from_argv\\n    self.execute(*args, **cmd_options)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\\\", line 460, in execute\\n    output = self.handle(*args, **options)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/commands/shell.py\\\", line 247, in handle\\n    exec(options[\\\"command\\\"], {**globals(), **self.get_namespace(**options)})\\n  File \\\"<string>\\\", line 1, in <module>\\nAssertionError: cross-tenant request returned 200: {'id': 1, 'name': 'Beta Project', 'confidential_summary': 'beta secret'}\\nARI_EVIDENCE_EVENT_ID=ev-0001-25822e6c\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDEtMjU4MjJlNmMiLCJyZWNvcmRfc2hhMjU2IjoiOTBjYWM0YmQ0MGM3NGQ3NzQyZDM4NzJjMGQyMDMzNTdkOTQyYjZmOWYzOTFhYjBmY2Y0ZWU3ZTc1MmVhMTRlOCJ9\\n\",\"exit_code\":1,\"status\":\"failed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_5\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase investigation -- bash -lc 'nl -ba api/views.py; nl -ba api/tests.py; nl -ba api/models.py'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_5\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase investigation -- bash -lc 'nl -ba api/views.py; nl -ba api/tests.py; nl -ba api/models.py'\\\"\",\"aggregated_output\":\"     1\\tfrom django.shortcuts import get_object_or_404\\n     2\\tfrom rest_framework.exceptions import ValidationError\\n     3\\tfrom rest_framework.response import Response\\n     4\\tfrom rest_framework.views import APIView\\n     5\\t\\n     6\\tfrom .models import Project\\n     7\\tfrom .serializers import ProjectSerializer\\n     8\\t\\n     9\\t\\n    10\\tdef request_tenant_id(request):\\n    11\\t    raw_tenant_id = request.headers.get(\\\"X-Tenant-ID\\\")\\n    12\\t    try:\\n    13\\t        return int(raw_tenant_id)\\n    14\\t    except (TypeError, ValueError) as exc:\\n    15\\t        raise ValidationError({\\\"tenant\\\": \\\"A numeric X-Tenant-ID header is required.\\\"}) from exc\\n    16\\t\\n    17\\t\\n    18\\tclass ProjectDetailView(APIView):\\n    19\\t    def get(self, request, project_id):\\n    20\\t        request_tenant_id(request)\\n    21\\t        project = get_object_or_404(Project, pk=project_id)\\n    22\\t        return Response(ProjectSerializer(project).data)\\n     1\\tfrom rest_framework.test import APITestCase\\n     2\\t\\n     3\\tfrom .models import Project, Tenant\\n     4\\t\\n     5\\t\\n     6\\tclass ProjectDetailSmokeTests(APITestCase):\\n     7\\t    def test_tenant_can_retrieve_its_project(self):\\n     8\\t        tenant = Tenant.objects.create(name=\\\"Synthetic Tenant\\\")\\n     9\\t        project = Project.objects.create(\\n    10\\t            tenant=tenant,\\n    11\\t            name=\\\"Synthetic Project\\\",\\n    12\\t            confidential_summary=\\\"synthetic summary\\\",\\n    13\\t        )\\n    14\\t\\n    15\\t        response = self.client.get(\\n    16\\t            f\\\"/api/projects/{project.pk}/\\\",\\n    17\\t            HTTP_X_TENANT_ID=str(tenant.pk),\\n    18\\t        )\\n    19\\t\\n    20\\t        self.assertEqual(response.status_code, 200)\\n    21\\t        self.assertEqual(response.json()[\\\"name\\\"], \\\"Synthetic Project\\\")\\n     1\\tfrom django.db import models\\n     2\\t\\n     3\\t\\n     4\\tclass Tenant(models.Model):\\n     5\\t    name = models.CharField(max_length=80)\\n     6\\t\\n     7\\t\\n     8\\tclass Project(models.Model):\\n     9\\t    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    10\\t    name = models.CharField(max_length=120)\\n    11\\t    confidential_summary = models.CharField(max_length=200)\\nARI_EVIDENCE_EVENT_ID=ev-0002-3413ca97\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDItMzQxM2NhOTciLCJyZWNvcmRfc2hhMjU2IjoiNTIxNjBmYmRiYWQ2MTk5NGQyNDg3ZmQyNzQ3ZDc0YjRlNWViNDdhY2M0ZmQ4YWM5MzFlMWVjYWE0NDVkOGZhNCJ9\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_6\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":\\\"ev-0001-25822e6c\\\",\\\"diagnosis\\\":{\\\"hypothesis\\\":\\\"The endpoint validates X-Tenant-ID but discards the parsed tenant ID, then fetches the project by primary key alone; this permits cross-tenant retrieval.\\\",\\\"evidence_event_ids\\\":[\\\"ev-0002-3413ca97\\\"]},\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"The reproduction and causal evidence are sufficient. I\u2019m applying the minimal tenant-scoped lookup and adding regression coverage for cross-tenant and nonexistent IDs while preserving the existing same-tenant check.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_7\",\"type\":\"file_change\",\"changes\":[{\"path\":\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/api/tests.py\",\"kind\":\"update\"},{\"path\":\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/api/views.py\",\"kind\":\"update\"}],\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_7\",\"type\":\"file_change\",\"changes\":[{\"path\":\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/api/tests.py\",\"kind\":\"update\"},{\"path\":\"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/api/views.py\",\"kind\":\"update\"}],\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_8\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase focused_verification -- python manage.py test api.tests.ProjectDetailSmokeTests.test_tenant_cannot_retrieve_another_tenants_project api.tests.ProjectDetailSmokeTests.test_nonexistent_project_returns_not_found'\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_8\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase focused_verification -- python manage.py test api.tests.ProjectDetailSmokeTests.test_tenant_cannot_retrieve_another_tenants_project api.tests.ProjectDetailSmokeTests.test_nonexistent_project_returns_not_found'\",\"aggregated_output\":\"Creating test database for alias 'default'...\\n..\\n----------------------------------------------------------------------\\nRan 2 tests in 0.006s\\n\\nOK\\nDestroying test database for alias 'default'...\\nARI_EVIDENCE_EVENT_ID=ev-0003-3d129e16\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDMtM2QxMjllMTYiLCJyZWNvcmRfc2hhMjU2IjoiNmYxNzZmOWM0ODczYzkzNzcyNjQ2ZTA5MmZhOWJlOWRmNWY4Njk0ZGZkYWZhZmYzM2E0NzE0OTNjY2Q5YWQ3MSJ9\\nFound 2 test(s).\\nSystem check identified no issues (0 silenced).\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_9\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":\\\"ev-0001-25822e6c\\\",\\\"diagnosis\\\":{\\\"hypothesis\\\":\\\"The endpoint validates X-Tenant-ID but discards the parsed tenant ID, then fetches the project by primary key alone; this permits cross-tenant retrieval.\\\",\\\"evidence_event_ids\\\":[\\\"ev-0002-3413ca97\\\"]},\\\"repair\\\":{\\\"summary\\\":\\\"Scoped project lookup to the requesting tenant and added cross-tenant and nonexistent-project regression tests.\\\",\\\"files\\\":[\\\"api/views.py\\\",\\\"api/tests.py\\\"]},\\\"focused_verification_event_id\\\":\\\"ev-0003-3d129e16\\\",\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"Focused verification passed. I\u2019m running the distinct full project test suite now.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_10\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase broad_verification -- python manage.py test'\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_10\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase broad_verification -- python manage.py test'\",\"aggregated_output\":\"Found 3 test(s).\\nSystem check identified no issues (0 silenced).\\nCreating test database for alias 'default'...\\n...\\n----------------------------------------------------------------------\\nRan 3 tests in 0.006s\\n\\nOK\\nDestroying test database for alias 'default'...\\nARI_EVIDENCE_EVENT_ID=ev-0004-de9ccc25\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDQtZGU5Y2NjMjUiLCJyZWNvcmRfc2hhMjU2IjoiMWU1YTE5YWM3NDMwNjQ0NjBiNzg0ODFiZjkwMWFjZDUyNDIwOWIyMDQyY2EzZTM4MzBjMzBlMzAwN2NjNDFjNCJ9\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_11\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"repaired\\\",\\\"reproduction_event_id\\\":\\\"ev-0001-25822e6c\\\",\\\"diagnosis\\\":{\\\"hypothesis\\\":\\\"The endpoint validated X-Tenant-ID but discarded the parsed tenant ID, then retrieved projects by primary key alone, allowing cross-tenant access.\\\",\\\"evidence_event_ids\\\":[\\\"ev-0002-3413ca97\\\"]},\\\"repair\\\":{\\\"summary\\\":\\\"Scoped project retrieval by both project ID and requesting tenant ID. Added regression tests ensuring cross-tenant and nonexistent projects return 404 while retaining same-tenant retrieval coverage.\\\",\\\"files\\\":[\\\"api/views.py\\\",\\\"api/tests.py\\\"]},\\\"focused_verification_event_id\\\":\\\"ev-0003-3d129e16\\\",\\\"broad_verification_event_id\\\":\\\"ev-0004-de9ccc25\\\",\\\"abstention_reason\\\":null}\"}}\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":124449,\"cached_input_tokens\":85504,\"cache_write_input_tokens\":0,\"output_tokens\":2498,\"reasoning_output_tokens\":656}}\n"
+  },
+  "case_id": "cross-tenant-data-exposure",
+  "evaluator": {
+    "command": [
+      "<REPOSITORY>/.venv/bin/python3",
+      "manage.py",
+      "test",
+      "api",
+      "benchmark_hidden_tests",
+      "--verbosity",
+      "1"
+    ],
+    "error": null,
+    "exit_code": 0,
+    "passed": true,
+    "runtime_seconds": 1.1375936299991736,
+    "state": "succeeded",
+    "stderr": "Creating test database for alias 'default'...\n......\n----------------------------------------------------------------------\nRan 6 tests in 0.012s\n\nOK\nDestroying test database for alias 'default'...\n",
+    "stdout": "Found 6 test(s).\nSystem check identified no issues (0 silenced).\n"
+  },
+  "evidence": [
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "shell",
+          "-c",
+          "from django.core.management import call_command; call_command(\"migrate\", run_syncdb=True, verbosity=0); from rest_framework.test import APIClient; from api.models import Tenant, Project; alpha=Tenant.objects.create(name=\"Alpha\"); beta=Tenant.objects.create(name=\"Beta\"); project=Project.objects.create(tenant=beta, name=\"Beta Project\", confidential_summary=\"beta secret\"); response=APIClient().get(f\"/api/projects/{project.pk}/\", HTTP_X_TENANT_ID=str(alpha.pk)); assert response.status_code == 404, f\"cross-tenant request returned {response.status_code}: {response.json()}\""
+        ],
+        "command_text": "python manage.py shell -c 'from django.core.management import call_command; call_command(\"migrate\", run_syncdb=True, verbosity=0); from rest_framework.test import APIClient; from api.models import Tenant, Project; alpha=Tenant.objects.create(name=\"Alpha\"); beta=Tenant.objects.create(name=\"Beta\"); project=Project.objects.create(tenant=beta, name=\"Beta Project\", confidential_summary=\"beta secret\"); response=APIClient().get(f\"/api/projects/{project.pk}/\", HTTP_X_TENANT_ID=str(alpha.pk)); assert response.status_code == 404, f\"cross-tenant request returned {response.status_code}: {response.json()}\"'",
+        "edit_state": "before_first_source_edit",
+        "event_id": "ev-0001-25822e6c",
+        "exit_code": 1,
+        "finished_at": "2026-08-29T13:08:13.219425+00:00",
+        "launch_error": null,
+        "order": 1,
+        "phase": "reproduction",
+        "record_sha256": "90cac4bd40c74d7742d3872c0d203357d942b6f9f391ab0fcf4ee7e752ea14e8",
+        "source_changes_after": [],
+        "source_changes_before": [],
+        "started_at": "2026-08-29T13:08:12.012472+00:00",
+        "stderr_excerpt": "Traceback (most recent call last):\n  File \"/tmp/ari-cross-tenant-data-exposure-aoxue1ev/workspace/manage.py\", line 10, in <module>\n    execute_from_command_line(sys.argv)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\", line 442, in execute_from_command_line\n    utility.execute()\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\", line 436, in execute\n    self.fetch_command(subcommand).run_from_argv(self.argv)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\", line 416, in run_from_argv\n    self.execute(*args, **cmd_options)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\", line 460, in execute\n    output = self.handle(*args, **options)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/commands/shell.py\", line 247, in handle\n    exec(options[\"command\"], {**globals(), **self.get_namespace(**options)})\n  File \"<string>\", line 1, in <module>\nAssertionError: cross-tenant request returned 200: {'id': 1, 'name': 'Beta Project', 'confidential_summary': 'beta secret'}\n",
+        "stderr_sha256": "5ca1e47cc3b3a7d064154dc088698eaad2c7cb4e89e66ca048f21fa0ab08104f",
+        "stdout_excerpt": "6 objects imported automatically (use -v 2 for details).\n\n",
+        "stdout_sha256": "d26ad7947aaf611e922f58b01f8b54a711b0930d275b3db93ecf16b1658e9d3c",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "bash",
+          "-lc",
+          "nl -ba api/views.py; nl -ba api/tests.py; nl -ba api/models.py"
+        ],
+        "command_text": "bash -lc 'nl -ba api/views.py; nl -ba api/tests.py; nl -ba api/models.py'",
+        "edit_state": "before_first_source_edit",
+        "event_id": "ev-0002-3413ca97",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T13:08:19.738488+00:00",
+        "launch_error": null,
+        "order": 2,
+        "phase": "investigation",
+        "record_sha256": "52160fbdbad61994d2487fd2747d74b4e5eb47acc4fd8ac931e1ecaa445d8fa4",
+        "source_changes_after": [],
+        "source_changes_before": [],
+        "started_at": "2026-08-29T13:08:19.565224+00:00",
+        "stderr_excerpt": "",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_excerpt": "     1\tfrom django.shortcuts import get_object_or_404\n     2\tfrom rest_framework.exceptions import ValidationError\n     3\tfrom rest_framework.response import Response\n     4\tfrom rest_framework.views import APIView\n     5\t\n     6\tfrom .models import Project\n     7\tfrom .serializers import ProjectSerializer\n     8\t\n     9\t\n    10\tdef request_tenant_id(request):\n    11\t    raw_tenant_id = request.headers.get(\"X-Tenant-ID\")\n    12\t    try:\n    13\t        return int(raw_tenant_id)\n    14\t    except (TypeError, ValueError) as exc:\n    15\t        raise ValidationError({\"tenant\": \"A numeric X-Tenant-ID header is required.\"}) from exc\n    16\t\n    17\t\n    18\tclass ProjectDetailView(APIView):\n    19\t    def get(self, request, project_id):\n    20\t        request_tenant_id(request)\n    21\t        project = get_object_or_404(Project, pk=project_id)\n    22\t        return Response(ProjectSerializer(project).data)\n     1\tfrom rest_framework.test import APITestCase\n     2\t\n     3\tfrom .models import Project, Tenant\n     4\t\n     5\t\n     6\tclass ProjectDetailSmokeTests(APITestCase):\n     7\t    def test_tenant_can_retrieve_its_project(self):\n     8\t        tenant = Tenant.objects.create(name=\"Synthetic Tenant\")\n     9\t        project = Project.objects.create(\n    10\t            tenant=tenant,\n    11\t            name=\"Synthetic Project\",\n    12\t            confidential_summary=\"synthetic summary\",\n    13\t        )\n    14\t\n    15\t        response = self.client.get(\n    16\t            f\"/api/projects/{project.pk}/\",\n    17\t            HTTP_X_TENANT_ID=str(tenant.pk),\n    18\t        )\n    19\t\n    20\t        self.assertEqual(response.status_code, 200)\n    21\t        self.assertEqual(response.json()[\"name\"], \"Synthetic Project\")\n     1\tfrom django.db import models\n     2\t\n     3\t\n     4\tclass Tenant(models.Model):\n     5\t    name = models.CharField(max_length=80)\n     6\t\n     7\t\n     8\tclass Project(models.Model):\n     9\t    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\n    10\t    name = models.CharField(max_length=120)\n    11\t    confidential_summary = models.CharField(max_length=200)\n",
+        "stdout_sha256": "c1eb871ab065a073eddcc7116966a1c4e19f4ce34789380d8817af6e2e078ac5",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "test",
+          "api.tests.ProjectDetailSmokeTests.test_tenant_cannot_retrieve_another_tenants_project",
+          "api.tests.ProjectDetailSmokeTests.test_nonexistent_project_returns_not_found"
+        ],
+        "command_text": "python manage.py test api.tests.ProjectDetailSmokeTests.test_tenant_cannot_retrieve_another_tenants_project api.tests.ProjectDetailSmokeTests.test_nonexistent_project_returns_not_found",
+        "edit_state": "after_first_source_edit",
+        "event_id": "ev-0003-3d129e16",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T13:08:39.994977+00:00",
+        "launch_error": null,
+        "order": 3,
+        "phase": "focused_verification",
+        "record_sha256": "6f176f9c4873c93772646e092fa9be9df5f8694dfdafaff33a471493ccd9ad71",
+        "source_changes_after": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "source_changes_before": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "started_at": "2026-08-29T13:08:38.697262+00:00",
+        "stderr_excerpt": "Creating test database for alias 'default'...\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.006s\n\nOK\nDestroying test database for alias 'default'...\n",
+        "stderr_sha256": "055ce30993241fc230aad4eb066d2180b12715bb8f88265e893fdee4e4f8a0d0",
+        "stdout_excerpt": "Found 2 test(s).\nSystem check identified no issues (0 silenced).\n",
+        "stdout_sha256": "f9cb3d49df00639515275ab75d43599911979cba6536cb748236d167762ea683",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "test"
+        ],
+        "command_text": "python manage.py test",
+        "edit_state": "after_first_source_edit",
+        "event_id": "ev-0004-de9ccc25",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T13:08:48.813217+00:00",
+        "launch_error": null,
+        "order": 4,
+        "phase": "broad_verification",
+        "record_sha256": "1e5a19ac743064460b78481bf901acd524209b2042ca3e3830c30e3007cc41c4",
+        "source_changes_after": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "source_changes_before": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "started_at": "2026-08-29T13:08:47.617222+00:00",
+        "stderr_excerpt": "Creating test database for alias 'default'...\n...\n----------------------------------------------------------------------\nRan 3 tests in 0.006s\n\nOK\nDestroying test database for alias 'default'...\n",
+        "stderr_sha256": "7921afd247f9b456ea7eb827d89d2236d038ba39449bd74e4394c26fb3915065",
+        "stdout_excerpt": "Found 3 test(s).\nSystem check identified no issues (0 silenced).\n",
+        "stdout_sha256": "e8a722535a6bc5ee28032723b68811a5589a3c21053b20de0dca2d581f22d42d",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "event_id": "ev-0001-25822e6c",
+        "validated": true
+      },
+      "type": "reproduction"
+    },
+    {
+      "evidence": {
+        "evidence_event_ids": [
+          "ev-0002-3413ca97"
+        ],
+        "hypothesis": "The endpoint validated X-Tenant-ID but discarded the parsed tenant ID, then retrieved projects by primary key alone, allowing cross-tenant access.",
+        "validated": true
+      },
+      "type": "diagnosis"
+    },
+    {
+      "evidence": {
+        "changed_files": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "files": [
+          "api/views.py",
+          "api/tests.py"
+        ],
+        "summary": "Scoped project retrieval by both project ID and requesting tenant ID. Added regression tests ensuring cross-tenant and nonexistent projects return 404 while retaining same-tenant retrieval coverage.",
+        "validated": true
+      },
+      "type": "repair"
+    },
+    {
+      "evidence": {
+        "broad_event_id": "ev-0004-de9ccc25",
+        "focused_event_id": "ev-0003-3d129e16",
+        "retry_count": 0,
+        "validated": true
+      },
+      "type": "verification"
+    }
+  ],
+  "evidence_error": null,
+  "final_response": "{\n  \"abstention_reason\": null,\n  \"broad_verification_event_id\": \"ev-0004-de9ccc25\",\n  \"diagnosis\": {\n    \"evidence_event_ids\": [\n      \"ev-0002-3413ca97\"\n    ],\n    \"hypothesis\": \"The endpoint validated X-Tenant-ID but discarded the parsed tenant ID, then retrieved projects by primary key alone, allowing cross-tenant access.\"\n  },\n  \"focused_verification_event_id\": \"ev-0003-3d129e16\",\n  \"repair\": {\n    \"files\": [\n      \"api/views.py\",\n      \"api/tests.py\"\n    ],\n    \"summary\": \"Scoped project retrieval by both project ID and requesting tenant ID. Added regression tests ensuring cross-tenant and nonexistent projects return 404 while retaining same-tenant retrieval coverage.\"\n  },\n  \"reproduction_event_id\": \"ev-0001-25822e6c\",\n  \"status\": \"repaired\"\n}\n",
+  "metrics": {
+    "agent_completed": true,
+    "agent_runtime_seconds": 86.521,
+    "cached_input_tokens": 85504,
+    "diagnosis_recorded": true,
+    "estimated_cost_usd": null,
+    "evaluation_runtime_seconds": 1.138,
+    "evidence_backed_repair": true,
+    "evidence_chain_complete": true,
+    "files_changed": 2,
+    "input_tokens": 124449,
+    "output_tokens": 2498,
+    "patch_created": true,
+    "reasoning_output_tokens": 656,
+    "reproduction_recorded": true,
+    "verification_recorded": true,
+    "verified_repair": true
+  },
+  "mode": "subprocess",
+  "patch": "diff --git a/api/tests.py b/api/tests.py\nindex a6c995e..3d4b544 100644\n--- a/api/tests.py\n+++ b/api/tests.py\n@@ -19,3 +19,29 @@ class ProjectDetailSmokeTests(APITestCase):\n \n         self.assertEqual(response.status_code, 200)\n         self.assertEqual(response.json()[\"name\"], \"Synthetic Project\")\n+\n+    def test_tenant_cannot_retrieve_another_tenants_project(self):\n+        requesting_tenant = Tenant.objects.create(name=\"Requesting Tenant\")\n+        owning_tenant = Tenant.objects.create(name=\"Owning Tenant\")\n+        project = Project.objects.create(\n+            tenant=owning_tenant,\n+            name=\"Private Project\",\n+            confidential_summary=\"private summary\",\n+        )\n+\n+        response = self.client.get(\n+            f\"/api/projects/{project.pk}/\",\n+            HTTP_X_TENANT_ID=str(requesting_tenant.pk),\n+        )\n+\n+        self.assertEqual(response.status_code, 404)\n+\n+    def test_nonexistent_project_returns_not_found(self):\n+        tenant = Tenant.objects.create(name=\"Synthetic Tenant\")\n+\n+        response = self.client.get(\n+            \"/api/projects/999999/\",\n+            HTTP_X_TENANT_ID=str(tenant.pk),\n+        )\n+\n+        self.assertEqual(response.status_code, 404)\ndiff --git a/api/views.py b/api/views.py\nindex e41ffcc..ba6d34e 100644\n--- a/api/views.py\n+++ b/api/views.py\n@@ -17,6 +17,6 @@ def request_tenant_id(request):\n \n class ProjectDetailView(APIView):\n     def get(self, request, project_id):\n-        request_tenant_id(request)\n-        project = get_object_or_404(Project, pk=project_id)\n+        tenant_id = request_tenant_id(request)\n+        project = get_object_or_404(Project, pk=project_id, tenant_id=tenant_id)\n         return Response(ProjectSerializer(project).data)\n",
+  "patch_files": [
+    "api/tests.py",
+    "api/views.py"
+  ],
+  "run_id": "20260829T130732Z-cross-tenant-data-exposure-070153fe",
+  "schema_version": "1.0",
+  "started_at": "2026-08-29T13:08:59.737476+00:00",
+  "suite": "heldout",
+  "trajectory_error": null,
+  "trajectory_events": 22,
+  "usage": {
+    "billing_basis": "chatgpt_subscription_usage_only",
+    "cached_input_tokens": 85504,
+    "codex_cli_version": "0.150.1",
+    "estimated_cost_usd": null,
+    "input_tokens": 124449,
+    "model": "gpt-5.6-sol",
+    "output_tokens": 2498,
+    "pricing": {
+      "as_of": "2026-08-28",
+      "cached_input_per_unit": 0.4,
+      "currency": "USD",
+      "input_per_unit": 4.0,
+      "model": "gpt-5.6-sol",
+      "notes": "Estimate assumes no individual request exceeds the model's 272K long-context pricing threshold. Reasoning tokens are included in output tokens and are not charged twice.",
+      "output_per_unit": 20.0,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+      "unit_tokens": 1000000
+    },
+    "provider": "openai-codex-cli",
+    "reasoning_effort": "medium",
+    "reasoning_output_tokens": 656,
+    "recorder_parse_errors": [],
+    "retry_count": 0,
+    "structured_evidence_events": 4,
+    "trajectory_parse_errors": [],
+    "turns": 1,
+    "usage_available": true,
+    "workflow_status": "repaired"
+  },
+  "usage_error": null,
+  "workflow": "advanced-v2"
+}

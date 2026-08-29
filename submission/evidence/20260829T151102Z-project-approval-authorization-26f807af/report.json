@@ -1,0 +1,290 @@
+{
+  "agent": {
+    "command": [
+      "<REPOSITORY>/.venv/bin/python",
+      "<REPOSITORY>/agents/codex_advanced_v2/adapter.py"
+    ],
+    "error": null,
+    "exit_code": 0,
+    "runtime_seconds": 103.57169879700086,
+    "state": "succeeded",
+    "stderr": "WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir \"/tmp\" (codex_home: AbsolutePathBuf(\"/tmp/ari-codex-home-2pqf3mok\"))\n",
+    "stdout": "{\"type\":\"thread.started\",\"thread_id\":\"01a04e13-0375-7c92-a137-ec1c96b1640a\"}\n{\"type\":\"turn.started\"}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_0\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":null,\\\"diagnosis\\\":null,\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"I\u2019m beginning with repository inspection to identify the existing deterministic test or request path, then I\u2019ll record the required failing reproduction before any edits.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_1\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- bash -lc 'pytest -q'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_1\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- bash -lc 'pytest -q'\\\"\",\"aggregated_output\":\"\\nno tests ran in 0.01s\\nARI_EVIDENCE_EVENT_ID=ev-0001-8d8991c9\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDEtOGQ4OTkxYzkiLCJyZWNvcmRfc2hhMjU2IjoiYjVkNjI2YjQ3YjUxYTFiODAzMjI2MDczNzgxNmVmODcwOWE5Y2JjMTVmZGE0ZmRiYjlmODQ2OGE1YWEwMzRkYSJ9\\n\",\"exit_code\":5,\"status\":\"failed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_2\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":null,\\\"diagnosis\\\":null,\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"The generic pytest entry point found no tests, so it is not a valid reproduction of the authorization defect. I\u2019m locating the project\u2019s actual API test harness next; no files have been edited.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_3\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"rg --files -g '\\\"'!*.pyc'\\\"' | sed -n '1,160p'\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_3\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"rg --files -g '\\\"'!*.pyc'\\\"' | sed -n '1,160p'\\\"\",\"aggregated_output\":\"ISSUE.md\\npyproject.toml\\nconfig/urls.py\\nconfig/__init__.py\\nconfig/settings.py\\napi/urls.py\\napi/__init__.py\\napi/models.py\\napi/views.py\\napi/tests.py\\nuv.lock\\nmanage.py\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_4\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"sed -n '1,260p' api/tests.py && sed -n '1,240p' api/views.py && sed -n '1,220p' api/models.py && sed -n '1,160p' pyproject.toml\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_4\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"sed -n '1,260p' api/tests.py && sed -n '1,240p' api/views.py && sed -n '1,220p' api/models.py && sed -n '1,160p' pyproject.toml\\\"\",\"aggregated_output\":\"from rest_framework.test import APITestCase\\n\\nfrom .models import Expense, Project, ProjectMembership, StaffUser, Tenant\\n\\n\\nclass ExpenseApprovalSmokeTests(APITestCase):\\n    def test_project_manager_can_approve_project_expense(self):\\n        tenant = Tenant.objects.create(name=\\\"Synthetic Tenant\\\")\\n        manager = StaffUser.objects.create(tenant=tenant, name=\\\"Synthetic Manager\\\")\\n        project = Project.objects.create(tenant=tenant, name=\\\"Synthetic Project\\\")\\n        ProjectMembership.objects.create(\\n            project=project,\\n            user=manager,\\n            role=ProjectMembership.MANAGER,\\n        )\\n        expense = Expense.objects.create(\\n            tenant=tenant,\\n            project=project,\\n            description=\\\"Synthetic expense\\\",\\n            amount_cents=5000,\\n        )\\n\\n        response = self.client.post(\\n            f\\\"/api/expenses/{expense.pk}/approve/\\\",\\n            HTTP_X_TENANT_ID=str(tenant.pk),\\n            HTTP_X_USER_ID=str(manager.pk),\\n        )\\n\\n        self.assertEqual(response.status_code, 200)\\n        self.assertEqual(response.json()[\\\"status\\\"], Expense.APPROVED)\\n        self.assertEqual(response.json()[\\\"approved_by\\\"], manager.pk)\\nfrom django.shortcuts import get_object_or_404\\nfrom rest_framework.exceptions import PermissionDenied, ValidationError\\nfrom rest_framework.response import Response\\nfrom rest_framework.views import APIView\\n\\nfrom .models import Expense, ProjectMembership, StaffUser, Tenant\\n\\n\\ndef numeric_header(request, name):\\n    try:\\n        return int(request.headers.get(name))\\n    except (TypeError, ValueError) as exc:\\n        raise ValidationError({name: \\\"A numeric header is required.\\\"}) from exc\\n\\n\\nclass ExpenseApprovalView(APIView):\\n    def post(self, request, expense_id):\\n        tenant = get_object_or_404(Tenant, pk=numeric_header(request, \\\"X-Tenant-ID\\\"))\\n        user = get_object_or_404(\\n            StaffUser,\\n            pk=numeric_header(request, \\\"X-User-ID\\\"),\\n            tenant=tenant,\\n        )\\n        expense = get_object_or_404(Expense, pk=expense_id, tenant=tenant)\\n        can_approve = ProjectMembership.objects.filter(\\n            user=user,\\n            role=ProjectMembership.MANAGER,\\n        ).exists()\\n        if not can_approve:\\n            raise PermissionDenied(\\\"Project manager access is required.\\\")\\n\\n        expense.status = Expense.APPROVED\\n        expense.approved_by = user\\n        expense.save(update_fields=(\\\"status\\\", \\\"approved_by\\\"))\\n        return Response(\\n            {\\n                \\\"id\\\": expense.pk,\\n                \\\"status\\\": expense.status,\\n                \\\"approved_by\\\": expense.approved_by_id,\\n            }\\n        )\\nfrom django.db import models\\n\\n\\nclass Tenant(models.Model):\\n    name = models.CharField(max_length=80)\\n\\n\\nclass StaffUser(models.Model):\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    name = models.CharField(max_length=80)\\n\\n\\nclass Project(models.Model):\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    name = models.CharField(max_length=120)\\n\\n\\nclass ProjectMembership(models.Model):\\n    MANAGER = \\\"manager\\\"\\n    CONTRIBUTOR = \\\"contributor\\\"\\n    ROLE_CHOICES = [(MANAGER, \\\"Manager\\\"), (CONTRIBUTOR, \\\"Contributor\\\")]\\n\\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\\n    user = models.ForeignKey(StaffUser, on_delete=models.CASCADE)\\n    role = models.CharField(max_length=20, choices=ROLE_CHOICES)\\n\\n    class Meta:\\n        constraints = [\\n            models.UniqueConstraint(\\n                fields=(\\\"project\\\", \\\"user\\\"),\\n                name=\\\"unique_project_membership\\\",\\n            )\\n        ]\\n\\n\\nclass Expense(models.Model):\\n    PENDING = \\\"pending\\\"\\n    APPROVED = \\\"approved\\\"\\n\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\\n    description = models.CharField(max_length=160)\\n    amount_cents = models.PositiveIntegerField()\\n    status = models.CharField(max_length=20, default=PENDING)\\n    approved_by = models.ForeignKey(\\n        StaffUser,\\n        null=True,\\n        blank=True,\\n        on_delete=models.SET_NULL,\\n        related_name=\\\"approved_expenses\\\",\\n    )\\n[project]\\nname = \\\"ari-development-case\\\"\\nversion = \\\"0.0.0\\\"\\nrequires-python = \\\">=3.12,<3.13\\\"\\ndependencies = [\\n  \\\"Django==5.2.5\\\",\\n  \\\"djangorestframework==3.16.1\\\",\\n]\\n\\n[tool.uv]\\npackage = false\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_5\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- python manage.py shell -c \\\\\\\"from django.test.utils import setup_test_environment, setup_databases; setup_test_environment(); setup_databases(verbosity=0, interactive=False); from rest_framework.test import APIClient; from api.models import Tenant, StaffUser, Project, ProjectMembership, Expense; t=Tenant.objects.create(name='T'); m=StaffUser.objects.create(tenant=t,name='M'); p1=Project.objects.create(tenant=t,name='Managed'); p2=Project.objects.create(tenant=t,name='Sibling'); ProjectMembership.objects.create(project=p1,user=m,role=ProjectMembership.MANAGER); e=Expense.objects.create(tenant=t,project=p2,description='x',amount_cents=1); r=APIClient().post(f'/api/expenses/{e.pk}/approve/', HTTP_X_TENANT_ID=str(t.pk), HTTP_X_USER_ID=str(m.pk)); assert r.status_code == 403, f'cross-project approval returned {r.status_code}'\\\\\\\"\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_5\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase reproduction -- python manage.py shell -c \\\\\\\"from django.test.utils import setup_test_environment, setup_databases; setup_test_environment(); setup_databases(verbosity=0, interactive=False); from rest_framework.test import APIClient; from api.models import Tenant, StaffUser, Project, ProjectMembership, Expense; t=Tenant.objects.create(name='T'); m=StaffUser.objects.create(tenant=t,name='M'); p1=Project.objects.create(tenant=t,name='Managed'); p2=Project.objects.create(tenant=t,name='Sibling'); ProjectMembership.objects.create(project=p1,user=m,role=ProjectMembership.MANAGER); e=Expense.objects.create(tenant=t,project=p2,description='x',amount_cents=1); r=APIClient().post(f'/api/expenses/{e.pk}/approve/', HTTP_X_TENANT_ID=str(t.pk), HTTP_X_USER_ID=str(m.pk)); assert r.status_code == 403, f'cross-project approval returned {r.status_code}'\\\\\\\"\\\"\",\"aggregated_output\":\"9 objects imported automatically (use -v 2 for details).\\n\\nTraceback (most recent call last):\\n  File \\\"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/manage.py\\\", line 10, in <module>\\n    execute_from_command_line(sys.argv)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\\\", line 442, in execute_from_command_line\\n    utility.execute()\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\\\", line 436, in execute\\n    self.fetch_command(subcommand).run_from_argv(self.argv)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\\\", line 416, in run_from_argv\\n    self.execute(*args, **cmd_options)\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\\\", line 460, in execute\\n    output = self.handle(*args, **options)\\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\\n  File \\\"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/commands/shell.py\\\", line 247, in handle\\n    exec(options[\\\"command\\\"], {**globals(), **self.get_namespace(**options)})\\n  File \\\"<string>\\\", line 1, in <module>\\nAssertionError: cross-project approval returned 200\\nARI_EVIDENCE_EVENT_ID=ev-0002-7383d88d\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDItNzM4M2Q4OGQiLCJyZWNvcmRfc2hhMjU2IjoiMWE3MmFkYTEzNWRmMTFhNzNiMjQyMjk5MDhhOTI2MTAwNjQ0ZGJiZGEyNjg2ODNjMDRlMWNmNzJjNjgyZmFjYyJ9\\n\",\"exit_code\":1,\"status\":\"failed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_6\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":\\\"ev-0002-7383d88d\\\",\\\"diagnosis\\\":null,\\\"repair\\\":null,\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"The deterministic API reproduction returned 200 where cross-project approval must be forbidden. I\u2019m now recording the authorization-query evidence before making the minimal repair.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_7\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase investigation -- bash -lc \\\\\\\"sed -n '1,180p' api/views.py; sed -n '1,220p' api/models.py; sed -n '1,220p' api/tests.py\\\\\\\"\\\"\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_7\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc \\\"ari-evidence --phase investigation -- bash -lc \\\\\\\"sed -n '1,180p' api/views.py; sed -n '1,220p' api/models.py; sed -n '1,220p' api/tests.py\\\\\\\"\\\"\",\"aggregated_output\":\"ARI_EVIDENCE_EVENT_ID=ev-0003-89475ad0\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDMtODk0NzVhZDAiLCJyZWNvcmRfc2hhMjU2IjoiZGI1ZTViYjZmZDA3MjZiNDdmMmM5M2U0ZDQ5MmQwYWZkYmFiZjNhNzU0YzI0YjRkZDUzNGQwMTY0Nzg4NzBkZSJ9\\nfrom django.shortcuts import get_object_or_404\\nfrom rest_framework.exceptions import PermissionDenied, ValidationError\\nfrom rest_framework.response import Response\\nfrom rest_framework.views import APIView\\n\\nfrom .models import Expense, ProjectMembership, StaffUser, Tenant\\n\\n\\ndef numeric_header(request, name):\\n    try:\\n        return int(request.headers.get(name))\\n    except (TypeError, ValueError) as exc:\\n        raise ValidationError({name: \\\"A numeric header is required.\\\"}) from exc\\n\\n\\nclass ExpenseApprovalView(APIView):\\n    def post(self, request, expense_id):\\n        tenant = get_object_or_404(Tenant, pk=numeric_header(request, \\\"X-Tenant-ID\\\"))\\n        user = get_object_or_404(\\n            StaffUser,\\n            pk=numeric_header(request, \\\"X-User-ID\\\"),\\n            tenant=tenant,\\n        )\\n        expense = get_object_or_404(Expense, pk=expense_id, tenant=tenant)\\n        can_approve = ProjectMembership.objects.filter(\\n            user=user,\\n            role=ProjectMembership.MANAGER,\\n        ).exists()\\n        if not can_approve:\\n            raise PermissionDenied(\\\"Project manager access is required.\\\")\\n\\n        expense.status = Expense.APPROVED\\n        expense.approved_by = user\\n        expense.save(update_fields=(\\\"status\\\", \\\"approved_by\\\"))\\n        return Response(\\n            {\\n                \\\"id\\\": expense.pk,\\n                \\\"status\\\": expense.status,\\n                \\\"approved_by\\\": expense.approved_by_id,\\n            }\\n        )\\nfrom django.db import models\\n\\n\\nclass Tenant(models.Model):\\n    name = models.CharField(max_length=80)\\n\\n\\nclass StaffUser(models.Model):\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    name = models.CharField(max_length=80)\\n\\n\\nclass Project(models.Model):\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    name = models.CharField(max_length=120)\\n\\n\\nclass ProjectMembership(models.Model):\\n    MANAGER = \\\"manager\\\"\\n    CONTRIBUTOR = \\\"contributor\\\"\\n    ROLE_CHOICES = [(MANAGER, \\\"Manager\\\"), (CONTRIBUTOR, \\\"Contributor\\\")]\\n\\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\\n    user = models.ForeignKey(StaffUser, on_delete=models.CASCADE)\\n    role = models.CharField(max_length=20, choices=ROLE_CHOICES)\\n\\n    class Meta:\\n        constraints = [\\n            models.UniqueConstraint(\\n                fields=(\\\"project\\\", \\\"user\\\"),\\n                name=\\\"unique_project_membership\\\",\\n            )\\n        ]\\n\\n\\nclass Expense(models.Model):\\n    PENDING = \\\"pending\\\"\\n    APPROVED = \\\"approved\\\"\\n\\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\\n    description = models.CharField(max_length=160)\\n    amount_cents = models.PositiveIntegerField()\\n    status = models.CharField(max_length=20, default=PENDING)\\n    approved_by = models.ForeignKey(\\n        StaffUser,\\n        null=True,\\n        blank=True,\\n        on_delete=models.SET_NULL,\\n        related_name=\\\"approved_expenses\\\",\\n    )\\nfrom rest_framework.test import APITestCase\\n\\nfrom .models import Expense, Project, ProjectMembership, StaffUser, Tenant\\n\\n\\nclass ExpenseApprovalSmokeTests(APITestCase):\\n    def test_project_manager_can_approve_project_expense(self):\\n        tenant = Tenant.objects.create(name=\\\"Synthetic Tenant\\\")\\n        manager = StaffUser.objects.create(tenant=tenant, name=\\\"Synthetic Manager\\\")\\n        project = Project.objects.create(tenant=tenant, name=\\\"Synthetic Project\\\")\\n        ProjectMembership.objects.create(\\n            project=project,\\n            user=manager,\\n            role=ProjectMembership.MANAGER,\\n        )\\n        expense = Expense.objects.create(\\n            tenant=tenant,\\n            project=project,\\n            description=\\\"Synthetic expense\\\",\\n            amount_cents=5000,\\n        )\\n\\n        response = self.client.post(\\n            f\\\"/api/expenses/{expense.pk}/approve/\\\",\\n            HTTP_X_TENANT_ID=str(tenant.pk),\\n            HTTP_X_USER_ID=str(manager.pk),\\n        )\\n\\n        self.assertEqual(response.status_code, 200)\\n        self.assertEqual(response.json()[\\\"status\\\"], Expense.APPROVED)\\n        self.assertEqual(response.json()[\\\"approved_by\\\"], manager.pk)\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_8\",\"type\":\"file_change\",\"changes\":[{\"path\":\"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/api/tests.py\",\"kind\":\"update\"},{\"path\":\"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/api/views.py\",\"kind\":\"update\"}],\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_8\",\"type\":\"file_change\",\"changes\":[{\"path\":\"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/api/tests.py\",\"kind\":\"update\"},{\"path\":\"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/api/views.py\",\"kind\":\"update\"}],\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_9\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"abstained\\\",\\\"reproduction_event_id\\\":\\\"ev-0002-7383d88d\\\",\\\"diagnosis\\\":{\\\"hypothesis\\\":\\\"The permission query checks only whether the user manages any project, omitting the expense project from the membership filter.\\\",\\\"evidence_event_ids\\\":[\\\"ev-0003-89475ad0\\\"]},\\\"repair\\\":{\\\"summary\\\":\\\"Scoped manager membership to the expense project and added a sibling-project denial regression test.\\\",\\\"files\\\":[\\\"api/views.py\\\",\\\"api/tests.py\\\"]},\\\"focused_verification_event_id\\\":null,\\\"broad_verification_event_id\\\":null,\\\"abstention_reason\\\":\\\"The minimal authorization repair and regression test are in place. I\u2019m running the focused cross-project denial test, followed by the distinct full project suite.\\\"}\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_10\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase focused_verification -- python manage.py test api.tests.ExpenseApprovalSmokeTests.test_manager_cannot_approve_sibling_project_expense'\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_10\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase focused_verification -- python manage.py test api.tests.ExpenseApprovalSmokeTests.test_manager_cannot_approve_sibling_project_expense'\",\"aggregated_output\":\"Found 1 test(s).\\nSystem check identified no issues (0 silenced).\\nCreating test database for alias 'default'...\\n.\\n----------------------------------------------------------------------\\nRan 1 test in 0.009s\\n\\nOK\\nDestroying test database for alias 'default'...\\nARI_EVIDENCE_EVENT_ID=ev-0004-727fb982\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDQtNzI3ZmI5ODIiLCJyZWNvcmRfc2hhMjU2IjoiYzE2YzUyOWM1YjU5ZWQ4OTMyNzBmNjI1YjZjNmExYTNlNGFlYzU3YTlmZDIyOTViZGM1YzVhNDhiMWVjNTYzNiJ9\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.started\",\"item\":{\"id\":\"item_11\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase broad_verification -- python manage.py test'\",\"aggregated_output\":\"\",\"exit_code\":null,\"status\":\"in_progress\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_11\",\"type\":\"command_execution\",\"command\":\"/usr/bin/bash -lc 'ari-evidence --phase broad_verification -- python manage.py test'\",\"aggregated_output\":\"Creating test database for alias 'default'...\\n..\\n----------------------------------------------------------------------\\nRan 2 tests in 0.013s\\n\\nOK\\nDestroying test database for alias 'default'...\\nARI_EVIDENCE_EVENT_ID=ev-0005-7eda07be\\nARI_EVIDENCE_RECEIPT=eyJldmVudF9pZCI6ImV2LTAwMDUtN2VkYTA3YmUiLCJyZWNvcmRfc2hhMjU2IjoiOGY5MzhmOTIzMDIyODUxNGQ5ZWEwZTY3OTFmYjljMDkzM2VlNTU2OWUzNDg3YzQ3MDI0YTIxMmMyYzJmMGM0YSJ9\\nFound 2 test(s).\\nSystem check identified no issues (0 silenced).\\n\",\"exit_code\":0,\"status\":\"completed\"}}\n{\"type\":\"item.completed\",\"item\":{\"id\":\"item_12\",\"type\":\"agent_message\",\"text\":\"{\\\"status\\\":\\\"repaired\\\",\\\"reproduction_event_id\\\":\\\"ev-0002-7383d88d\\\",\\\"diagnosis\\\":{\\\"hypothesis\\\":\\\"The approval permission query accepted manager membership in any project instead of requiring membership in the expense's project.\\\",\\\"evidence_event_ids\\\":[\\\"ev-0003-89475ad0\\\"]},\\\"repair\\\":{\\\"summary\\\":\\\"Scoped manager authorization to the expense project and added a regression test ensuring sibling-project expenses remain unapproved.\\\",\\\"files\\\":[\\\"api/views.py\\\",\\\"api/tests.py\\\"]},\\\"focused_verification_event_id\\\":\\\"ev-0004-727fb982\\\",\\\"broad_verification_event_id\\\":\\\"ev-0005-7eda07be\\\",\\\"abstention_reason\\\":null}\"}}\n{\"type\":\"turn.completed\",\"usage\":{\"input_tokens\":145062,\"cached_input_tokens\":102656,\"cache_write_input_tokens\":0,\"output_tokens\":2823,\"reasoning_output_tokens\":913}}\n"
+  },
+  "case_id": "project-approval-authorization",
+  "evaluator": {
+    "command": [
+      "<REPOSITORY>/.venv/bin/python3",
+      "manage.py",
+      "test",
+      "api",
+      "benchmark_hidden_tests",
+      "--verbosity",
+      "1"
+    ],
+    "error": null,
+    "exit_code": 0,
+    "passed": true,
+    "runtime_seconds": 0.7136706199999026,
+    "state": "succeeded",
+    "stderr": "Creating test database for alias 'default'...\n.....\n----------------------------------------------------------------------\nRan 5 tests in 0.037s\n\nOK\nDestroying test database for alias 'default'...\n",
+    "stdout": "Found 5 test(s).\nSystem check identified no issues (0 silenced).\n"
+  },
+  "evidence": [
+    {
+      "evidence": {
+        "command": [
+          "bash",
+          "-lc",
+          "pytest -q"
+        ],
+        "command_text": "bash -lc 'pytest -q'",
+        "edit_state": "before_first_source_edit",
+        "event_id": "ev-0001-8d8991c9",
+        "exit_code": 5,
+        "finished_at": "2026-08-29T15:11:21.929513+00:00",
+        "launch_error": null,
+        "order": 1,
+        "phase": "reproduction",
+        "record_sha256": "b5d626b47b51a1b8032260737816ef8709a9cbc15fda4fdbb9f8468a5aa034da",
+        "source_changes_after": [],
+        "source_changes_before": [],
+        "started_at": "2026-08-29T15:11:21.413934+00:00",
+        "stderr_excerpt": "",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_excerpt": "\nno tests ran in 0.01s\n",
+        "stdout_sha256": "a76c54a6ccf0d022c4f7feadf6e0a911f73f0276a7817c6a558120bd024ee0d2",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "shell",
+          "-c",
+          "from django.test.utils import setup_test_environment, setup_databases; setup_test_environment(); setup_databases(verbosity=0, interactive=False); from rest_framework.test import APIClient; from api.models import Tenant, StaffUser, Project, ProjectMembership, Expense; t=Tenant.objects.create(name='T'); m=StaffUser.objects.create(tenant=t,name='M'); p1=Project.objects.create(tenant=t,name='Managed'); p2=Project.objects.create(tenant=t,name='Sibling'); ProjectMembership.objects.create(project=p1,user=m,role=ProjectMembership.MANAGER); e=Expense.objects.create(tenant=t,project=p2,description='x',amount_cents=1); r=APIClient().post(f'/api/expenses/{e.pk}/approve/', HTTP_X_TENANT_ID=str(t.pk), HTTP_X_USER_ID=str(m.pk)); assert r.status_code == 403, f'cross-project approval returned {r.status_code}'"
+        ],
+        "command_text": "python manage.py shell -c 'from django.test.utils import setup_test_environment, setup_databases; setup_test_environment(); setup_databases(verbosity=0, interactive=False); from rest_framework.test import APIClient; from api.models import Tenant, StaffUser, Project, ProjectMembership, Expense; t=Tenant.objects.create(name='\"'\"'T'\"'\"'); m=StaffUser.objects.create(tenant=t,name='\"'\"'M'\"'\"'); p1=Project.objects.create(tenant=t,name='\"'\"'Managed'\"'\"'); p2=Project.objects.create(tenant=t,name='\"'\"'Sibling'\"'\"'); ProjectMembership.objects.create(project=p1,user=m,role=ProjectMembership.MANAGER); e=Expense.objects.create(tenant=t,project=p2,description='\"'\"'x'\"'\"',amount_cents=1); r=APIClient().post(f'\"'\"'/api/expenses/{e.pk}/approve/'\"'\"', HTTP_X_TENANT_ID=str(t.pk), HTTP_X_USER_ID=str(m.pk)); assert r.status_code == 403, f'\"'\"'cross-project approval returned {r.status_code}'\"'\"''",
+        "edit_state": "before_first_source_edit",
+        "event_id": "ev-0002-7383d88d",
+        "exit_code": 1,
+        "finished_at": "2026-08-29T15:11:57.238300+00:00",
+        "launch_error": null,
+        "order": 2,
+        "phase": "reproduction",
+        "record_sha256": "1a72ada135df11a73b24229908a926100644dbbda268683c04e1cf72c682facc",
+        "source_changes_after": [],
+        "source_changes_before": [],
+        "started_at": "2026-08-29T15:11:56.535745+00:00",
+        "stderr_excerpt": "Traceback (most recent call last):\n  File \"/tmp/ari-project-approval-authorization-pt4k7wo9/workspace/manage.py\", line 10, in <module>\n    execute_from_command_line(sys.argv)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\", line 442, in execute_from_command_line\n    utility.execute()\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/__init__.py\", line 436, in execute\n    self.fetch_command(subcommand).run_from_argv(self.argv)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\", line 416, in run_from_argv\n    self.execute(*args, **cmd_options)\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/base.py\", line 460, in execute\n    output = self.handle(*args, **options)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<REPOSITORY>/.venv/lib/python3.12/site-packages/django/core/management/commands/shell.py\", line 247, in handle\n    exec(options[\"command\"], {**globals(), **self.get_namespace(**options)})\n  File \"<string>\", line 1, in <module>\nAssertionError: cross-project approval returned 200\n",
+        "stderr_sha256": "d879809e823d8438bf81a40793532215020b81156df0d481481e3866a224c79e",
+        "stdout_excerpt": "9 objects imported automatically (use -v 2 for details).\n\n",
+        "stdout_sha256": "47865fb2a28f115c60cc0743c83a779b3fef07f2f2ef49b95506c77b093df927",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "bash",
+          "-lc",
+          "sed -n '1,180p' api/views.py; sed -n '1,220p' api/models.py; sed -n '1,220p' api/tests.py"
+        ],
+        "command_text": "bash -lc 'sed -n '\"'\"'1,180p'\"'\"' api/views.py; sed -n '\"'\"'1,220p'\"'\"' api/models.py; sed -n '\"'\"'1,220p'\"'\"' api/tests.py'",
+        "edit_state": "before_first_source_edit",
+        "event_id": "ev-0003-89475ad0",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T15:12:05.152722+00:00",
+        "launch_error": null,
+        "order": 3,
+        "phase": "investigation",
+        "record_sha256": "db5e5bb6fd0726b47f2c93e4d492d0afdbabf3a754c24b4dd534d016478870de",
+        "source_changes_after": [],
+        "source_changes_before": [],
+        "started_at": "2026-08-29T15:12:04.923483+00:00",
+        "stderr_excerpt": "",
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_excerpt": "from django.shortcuts import get_object_or_404\nfrom rest_framework.exceptions import PermissionDenied, ValidationError\nfrom rest_framework.response import Response\nfrom rest_framework.views import APIView\n\nfrom .models import Expense, ProjectMembership, StaffUser, Tenant\n\n\ndef numeric_header(request, name):\n    try:\n        return int(request.headers.get(name))\n    except (TypeError, ValueError) as exc:\n        raise ValidationError({name: \"A numeric header is required.\"}) from exc\n\n\nclass ExpenseApprovalView(APIView):\n    def post(self, request, expense_id):\n        tenant = get_object_or_404(Tenant, pk=numeric_header(request, \"X-Tenant-ID\"))\n        user = get_object_or_404(\n            StaffUser,\n            pk=numeric_header(request, \"X-User-ID\"),\n            tenant=tenant,\n        )\n        expense = get_object_or_404(Expense, pk=expense_id, tenant=tenant)\n        can_approve = ProjectMembership.objects.filter(\n            user=user,\n            role=ProjectMembership.MANAGER,\n        ).exists()\n        if not can_approve:\n            raise PermissionDenied(\"Project manager access is required.\")\n\n        expense.status = Expense.APPROVED\n        expense.approved_by = user\n        expense.save(update_fields=(\"status\", \"approved_by\"))\n        return Response(\n            {\n                \"id\": expense.pk,\n                \"status\": expense.status,\n                \"approved_by\": expense.approved_by_id,\n            }\n        )\nfrom django.db import models\n\n\nclass Tenant(models.Model):\n    name = models.CharField(max_length=80)\n\n\nclass StaffUser(models.Model):\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\n    name = models.CharField(max_length=80)\n\n\nclass Project(models.Model):\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\n    name = models.CharField(max_length=120)\n\n\nclass ProjectMembership(models.Model):\n    MANAGER = \"manager\"\n    CONTRIBUTOR = \"contributor\"\n    ROLE_CHOICES = [(MANAGER, \"Manager\"), (CONTRIBUTOR, \"Contributor\")]\n\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\n    user = models.ForeignKey(StaffUser, on_delete=models.CASCADE)\n    role = models.CharField(max_length=20, choices=ROLE_CHOICES)\n\n    class Meta:\n        constraints = [\n            models.UniqueConstraint(\n                fields=(\"project\", \"user\"),\n                name=\"unique_project_membership\",\n            )\n        ]\n\n\nclass Expense(models.Model):\n    PENDING = \"pending\"\n    APPROVED = \"approved\"\n\n    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE)\n    project = models.ForeignKey(Project, on_delete=models.CASCADE)\n    description = models.CharField(max_length=160)\n    amount_cents = models.PositiveIntegerField()\n    status = models.CharField(max_length=20, default=PENDING)\n    approved_by = models.ForeignKey(\n        StaffUser,\n        null=True,\n        blank=True,\n        on_delete=models.SET_NULL,\n        related_name=\"approved_expenses\",\n    )\nfrom rest_framework.test import APITestCase\n\nfrom .models import Expense, Project, ProjectMembership, StaffUser, Tenant\n\n\nclass ExpenseApprovalSmokeTests(APITestCase):\n    def test_project_manager_can_approve_project_expense(self):\n        tenant = Tenant.objects.create(name=\"Synthetic Tenant\")\n        manager = StaffUser.objects.create(tenant=tenant, name=\"Synthetic Manager\")\n        project = Project.objects.create(tenant=tenant, name=\"Synthetic Project\")\n        ProjectMembership.objects.create(\n            project=project,\n            user=manager,\n            role=ProjectMembership.MANAGER,\n        )\n        expense = Expense.objects.create(\n            tenant=tenant,\n            project=project,\n            description=\"Synthetic expense\",\n            amount_cents=5000,\n        )\n\n        response = self.client.post(\n            f\"/api/expenses/{expense.pk}/approve/\",\n            HTTP_X_TENANT_ID=str(tenant.pk),\n            HTTP_X_USER_ID=str(manager.pk),\n        )\n\n        self.assertEqual(response.status_code, 200)\n        self.assertEqual(response.json()[\"status\"], Expense.APPROVED)\n        self.assertEqual(response.json()[\"approved_by\"], manager.pk)\n",
+        "stdout_sha256": "5dfbedb66927abce6c616f19c83872f2c1eac5ff5bd229b3c27cf55c60cfc98c",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "test",
+          "api.tests.ExpenseApprovalSmokeTests.test_manager_cannot_approve_sibling_project_expense"
+        ],
+        "command_text": "python manage.py test api.tests.ExpenseApprovalSmokeTests.test_manager_cannot_approve_sibling_project_expense",
+        "edit_state": "after_first_source_edit",
+        "event_id": "ev-0004-727fb982",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T15:12:30.960425+00:00",
+        "launch_error": null,
+        "order": 4,
+        "phase": "focused_verification",
+        "record_sha256": "c16c529c5b59ed893270f625b6c6a1a3e4aec57a9fd2295bdc5c5a48b1ec5636",
+        "source_changes_after": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "source_changes_before": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "started_at": "2026-08-29T15:12:30.300819+00:00",
+        "stderr_excerpt": "Creating test database for alias 'default'...\n.\n----------------------------------------------------------------------\nRan 1 test in 0.009s\n\nOK\nDestroying test database for alias 'default'...\n",
+        "stderr_sha256": "9984782ca7be3d64c3b68737975a4f60e25bb589c151ba45681c0f542ae9bad2",
+        "stdout_excerpt": "Found 1 test(s).\nSystem check identified no issues (0 silenced).\n",
+        "stdout_sha256": "11681d6688f45769771586268917f378bd642e8d6bf219f5b44040b49d2bed06",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "command": [
+          "python",
+          "manage.py",
+          "test"
+        ],
+        "command_text": "python manage.py test",
+        "edit_state": "after_first_source_edit",
+        "event_id": "ev-0005-7eda07be",
+        "exit_code": 0,
+        "finished_at": "2026-08-29T15:12:35.906441+00:00",
+        "launch_error": null,
+        "order": 5,
+        "phase": "broad_verification",
+        "record_sha256": "8f938f9230228514d9ea0e6791fb9c0933ee5569e3487c47024a212c2c2f0c4a",
+        "source_changes_after": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "source_changes_before": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "started_at": "2026-08-29T15:12:35.275865+00:00",
+        "stderr_excerpt": "Creating test database for alias 'default'...\n..\n----------------------------------------------------------------------\nRan 2 tests in 0.013s\n\nOK\nDestroying test database for alias 'default'...\n",
+        "stderr_sha256": "42c60606c25817c42b6b308a97d4bc99c0d9e9a48a5796a39bf61d0ab44fcc3c",
+        "stdout_excerpt": "Found 2 test(s).\nSystem check identified no issues (0 silenced).\n",
+        "stdout_sha256": "f9cb3d49df00639515275ab75d43599911979cba6536cb748236d167762ea683",
+        "validated": true
+      },
+      "type": "command_evidence"
+    },
+    {
+      "evidence": {
+        "event_id": "ev-0002-7383d88d",
+        "validated": true
+      },
+      "type": "reproduction"
+    },
+    {
+      "evidence": {
+        "evidence_event_ids": [
+          "ev-0003-89475ad0"
+        ],
+        "hypothesis": "The approval permission query accepted manager membership in any project instead of requiring membership in the expense's project.",
+        "validated": true
+      },
+      "type": "diagnosis"
+    },
+    {
+      "evidence": {
+        "changed_files": [
+          "api/tests.py",
+          "api/views.py"
+        ],
+        "files": [
+          "api/views.py",
+          "api/tests.py"
+        ],
+        "summary": "Scoped manager authorization to the expense project and added a regression test ensuring sibling-project expenses remain unapproved.",
+        "validated": true
+      },
+      "type": "repair"
+    },
+    {
+      "evidence": {
+        "broad_event_id": "ev-0005-7eda07be",
+        "focused_event_id": "ev-0004-727fb982",
+        "retry_count": 0,
+        "validated": true
+      },
+      "type": "verification"
+    }
+  ],
+  "evidence_error": null,
+  "final_response": "{\n  \"abstention_reason\": null,\n  \"broad_verification_event_id\": \"ev-0005-7eda07be\",\n  \"diagnosis\": {\n    \"evidence_event_ids\": [\n      \"ev-0003-89475ad0\"\n    ],\n    \"hypothesis\": \"The approval permission query accepted manager membership in any project instead of requiring membership in the expense's project.\"\n  },\n  \"focused_verification_event_id\": \"ev-0004-727fb982\",\n  \"repair\": {\n    \"files\": [\n      \"api/views.py\",\n      \"api/tests.py\"\n    ],\n    \"summary\": \"Scoped manager authorization to the expense project and added a regression test ensuring sibling-project expenses remain unapproved.\"\n  },\n  \"reproduction_event_id\": \"ev-0002-7383d88d\",\n  \"status\": \"repaired\"\n}\n",
+  "metrics": {
+    "agent_completed": true,
+    "agent_runtime_seconds": 103.572,
+    "cached_input_tokens": 102656,
+    "diagnosis_recorded": true,
+    "estimated_cost_usd": null,
+    "evaluation_runtime_seconds": 0.714,
+    "evidence_backed_repair": true,
+    "evidence_chain_complete": true,
+    "files_changed": 2,
+    "input_tokens": 145062,
+    "output_tokens": 2823,
+    "patch_created": true,
+    "reasoning_output_tokens": 913,
+    "reproduction_recorded": true,
+    "verification_recorded": true,
+    "verified_repair": true
+  },
+  "mode": "subprocess",
+  "patch": "diff --git a/api/tests.py b/api/tests.py\nindex 6c2f4cd..28f5f02 100644\n--- a/api/tests.py\n+++ b/api/tests.py\n@@ -29,3 +29,31 @@ class ExpenseApprovalSmokeTests(APITestCase):\n         self.assertEqual(response.status_code, 200)\n         self.assertEqual(response.json()[\"status\"], Expense.APPROVED)\n         self.assertEqual(response.json()[\"approved_by\"], manager.pk)\n+\n+    def test_manager_cannot_approve_sibling_project_expense(self):\n+        tenant = Tenant.objects.create(name=\"Synthetic Tenant\")\n+        manager = StaffUser.objects.create(tenant=tenant, name=\"Synthetic Manager\")\n+        managed_project = Project.objects.create(tenant=tenant, name=\"Managed Project\")\n+        sibling_project = Project.objects.create(tenant=tenant, name=\"Sibling Project\")\n+        ProjectMembership.objects.create(\n+            project=managed_project,\n+            user=manager,\n+            role=ProjectMembership.MANAGER,\n+        )\n+        expense = Expense.objects.create(\n+            tenant=tenant,\n+            project=sibling_project,\n+            description=\"Synthetic expense\",\n+            amount_cents=5000,\n+        )\n+\n+        response = self.client.post(\n+            f\"/api/expenses/{expense.pk}/approve/\",\n+            HTTP_X_TENANT_ID=str(tenant.pk),\n+            HTTP_X_USER_ID=str(manager.pk),\n+        )\n+\n+        self.assertEqual(response.status_code, 403)\n+        expense.refresh_from_db()\n+        self.assertEqual(expense.status, Expense.PENDING)\n+        self.assertIsNone(expense.approved_by)\ndiff --git a/api/views.py b/api/views.py\nindex c1bde51..b27c160 100644\n--- a/api/views.py\n+++ b/api/views.py\n@@ -24,6 +24,7 @@ class ExpenseApprovalView(APIView):\n         expense = get_object_or_404(Expense, pk=expense_id, tenant=tenant)\n         can_approve = ProjectMembership.objects.filter(\n             user=user,\n+            project=expense.project,\n             role=ProjectMembership.MANAGER,\n         ).exists()\n         if not can_approve:\n",
+  "patch_files": [
+    "api/tests.py",
+    "api/views.py"
+  ],
+  "run_id": "20260829T151102Z-project-approval-authorization-26f807af",
+  "schema_version": "1.0",
+  "started_at": "2026-08-29T15:12:46.717195+00:00",
+  "suite": "final",
+  "trajectory_error": null,
+  "trajectory_events": 24,
+  "usage": {
+    "billing_basis": "chatgpt_subscription_usage_only",
+    "cached_input_tokens": 102656,
+    "codex_cli_version": "0.150.1",
+    "estimated_cost_usd": null,
+    "input_tokens": 145062,
+    "model": "gpt-5.6-sol",
+    "output_tokens": 2823,
+    "pricing": {
+      "as_of": "2026-08-28",
+      "cached_input_per_unit": 0.4,
+      "currency": "USD",
+      "input_per_unit": 4.0,
+      "model": "gpt-5.6-sol",
+      "notes": "Estimate assumes no individual request exceeds the model's 272K long-context pricing threshold. Reasoning tokens are included in output tokens and are not charged twice.",
+      "output_per_unit": 20.0,
+      "source": "https://developers.openai.com/api/docs/models/gpt-5.6-sol",
+      "unit_tokens": 1000000
+    },
+    "provider": "openai-codex-cli",
+    "reasoning_effort": "medium",
+    "reasoning_output_tokens": 913,
+    "recorder_parse_errors": [],
+    "retry_count": 0,
+    "structured_evidence_events": 5,
+    "trajectory_parse_errors": [],
+    "turns": 1,
+    "usage_available": true,
+    "workflow_status": "repaired"
+  },
+  "usage_error": null,
+  "workflow": "advanced-v2"
+}

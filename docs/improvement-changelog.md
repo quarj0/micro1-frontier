@@ -19,7 +19,7 @@ Measured:
 
 Sources: [development comparison](../benchmark/comparisons/advanced-v1-development.json), [V1 hard-case comparison](../benchmark/comparisons/heldout-v1.json), and [final comparison](../benchmark/comparisons/final-v1.json).
 
-Interpretation: the baseline was already a strong repair agent in this benchmark. The remaining measured problem was auditability, not patch success.
+Interpretation: the baseline was already a strong repair agent in this benchmark. The remaining measured problem was the absence of an ARI-validated structured evidence chain, not patch success.
 
 ## Advanced V1: evidence-disciplined repair sequence
 
@@ -83,7 +83,7 @@ Measured in the single final pass:
 
 Sources: [final comparison](../benchmark/comparisons/final-v1.json) and [preflight record](../benchmark/validations/final-v1-preflight.json).
 
-Interpretation: the final experiment supports the auditability claim. It does not show a verified-repair-rate improvement, because both workflows repaired all four cases. It also shows a material, variable runtime cost for V2 in the final pass.
+Interpretation: the final experiment supports the ARI structured-evidence qualification claim. It does not show a verified-repair-rate improvement, because both workflows repaired all four cases. It also shows a material, variable runtime cost for V2 in the final pass.
 
 ## Frozen state
 

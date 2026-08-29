@@ -4,7 +4,7 @@
 
 A general-purpose coding agent repaired all four final unseen Django/DRF regressions. ARI V2 did not increase that already-perfect verified repair rate; it preserved 4/4 success while turning 0/4 evidence-backed baseline repairs into 4/4 evidence-backed repairs grounded in actual execution events.
 
-This is an auditability result, not a claim that V2 repaired more bugs.
+This is an ARI structured-evidence qualification result, not a claim that V2 repaired more bugs or that baseline work cannot be reviewed by other means.
 
 ## Final unseen suite
 

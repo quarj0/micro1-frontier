@@ -2,11 +2,19 @@
 
 ARI is a benchmark and workflow for evidence-backed repair of Django REST Framework regressions.
 
+## Problem / User
+
+ARI is for backend engineers who must review AI-generated API regression repairs. A passing patch is necessary, but reviewers also need a compact record of the failure reproduced, the cause inferred, and the exact executions used to verify the change.
+
 The experiment's central result is deliberately narrower than “agents fix bugs better”:
 
-> A general-purpose coding agent repaired all four final unseen regressions, but none of those repairs qualified as independently auditable. ARI V2 preserved the same 4/4 repair success while producing 4/4 evidence chains grounded in actual execution events.
+> A general-purpose coding agent repaired all four final unseen regressions, but none of those repairs carried an ARI-validated structured evidence chain. ARI V2 preserved the same 4/4 repair success while producing 4/4 evidence chains grounded in actual execution events.
 
 Both workflows used Codex CLI 0.150.1, `gpt-5.6-sol`, medium reasoning, one agent, and the same repository tools. The measured difference came from workflow and evidence transport, not a model upgrade.
+
+## Hot Take
+
+The patch was not the differentiator: the general-purpose agent already fixed 4/4 final regressions. The useful workflow change was making repair claims checkable without relying on the agent's prose by binding them to recorded command events.
 
 ## Final result
 
@@ -17,7 +25,7 @@ Both workflows used Codex CLI 0.150.1, `gpt-5.6-sol`, medium reasoning, one agen
 
 Source: the committed, machine-generated [final comparison](benchmark/comparisons/final-v1.json). The final cases were tenant-scoped idempotency keys, timezone/DST day boundaries, multipart upload parsing, and project-scoped expense approval authorization.
 
-V2 did not improve verified repair rate in the final suite; both workflows repaired every case. It changed auditability. The tradeoff was runtime: aggregate V2 runtime was 2.98 times baseline. One V2 idempotency run took 836.059s and dominates that total; it succeeded without a retry. The experiment did not produce API-key billing data, so this repository makes no dollar-cost claim.
+V2 did not improve verified repair rate in the final suite; both workflows repaired every case. It changed ARI evidence qualification. The tradeoff was runtime: aggregate V2 runtime was 2.98 times baseline. One V2 idempotency run took 836.059s and dominates that total; it succeeded without a retry. The experiment did not produce API-key billing data, so this repository makes no dollar-cost claim.
 
 ## What “evidence-backed” means
 
@@ -105,8 +113,9 @@ For exact artifact checks and new isolated replications, use the [reproduction g
 - [Improvement changelog](docs/improvement-changelog.md)
 - [Exact reproduction guide](docs/reproduction.md)
 - [Trajectory submission index](docs/trajectory-index.md)
+- [Sanitized representative evidence bundle](submission/README.md)
 - [Five-minute demo outline](docs/demo-outline.md)
 - [Benchmark and trust-boundary design](docs/benchmark-design.md)
 - [Hackathon brief, preserved unchanged](docs/micro1%20-%20First%20Hackathon97ce7c5.pdf)
 
-Every run writes ignored raw reports, patches, logs, evidence, and trajectories beneath `benchmark/results/<run-id>/` and `trajectories/`. Committed comparison artifacts are generated mechanically from explicit run-ID specifications and include SHA-256 hashes of their source reports.
+Every run writes ignored raw reports, patches, logs, evidence, and trajectories beneath `benchmark/results/<run-id>/` and `trajectories/`. A small sanitized representative subset is intentionally committed under `submission/`; the raw source artifacts remain ignored and unchanged. Committed comparison artifacts are generated mechanically from explicit run-ID specifications and include SHA-256 hashes of their source reports.

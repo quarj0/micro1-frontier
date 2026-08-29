@@ -1,6 +1,6 @@
 # Five-minute demo outline
 
-The demo should show the measured distinction between repair and auditability. Avoid a live model run: it is stochastic, can exceed the presentation window, and would not be one of the frozen reported runs.
+The demo should show the measured distinction between repair and an ARI-validated structured evidence chain. Avoid a live model run: it is stochastic, can exceed the presentation window, and would not be one of the frozen reported runs.
 
 ## 0:00-0:40 — Problem and thesis
 
@@ -23,12 +23,12 @@ Explain:
 
 Mention the execution limitation immediately: the measured model runs used fresh-state subprocess mode because no API key was available. Docker isolation exists, but these results are not Docker-isolated claims.
 
-## 1:20-2:05 — Baseline: successful but unaudited
+## 1:20-2:05 — Baseline: successful without an ARI-validated chain
 
 Open the preserved baseline authorization run:
 
 ```text
-benchmark/results/20260829T143903Z-project-approval-authorization-867f97f7/
+submission/evidence/20260829T143903Z-project-approval-authorization-867f97f7/
 ```
 
 Show `patch.diff`, then `evaluator.stdout.log` and `report.json`.
@@ -39,14 +39,14 @@ Point out:
 - the final comparison records it as verified;
 - it did not produce a qualified reproduction, diagnosis, and verification chain.
 
-Do not imply the baseline patch was bad. The measured gap is independent auditability.
+Do not imply the baseline patch was bad or impossible to review by other means. The measured gap is specifically the absence of an ARI-validated structured evidence chain.
 
 ## 2:05-3:20 — V2: event-grounded evidence
 
 Open the matching V2 authorization run:
 
 ```text
-benchmark/results/20260829T151102Z-project-approval-authorization-26f807af/
+submission/evidence/20260829T151102Z-project-approval-authorization-26f807af/
 ```
 
 Show, in order:
@@ -71,6 +71,8 @@ Show the four-stage table in [final-results.md](final-results.md):
 
 This sequence shows why the project moved from workflow instructions to structured execution references.
 
+Explicitly identify the discarded experiment: V1 tried to qualify evidence by matching agent-authored free text against pre-edit command output. The hard-case runs showed that this matching layer could reject successful, evidence-disciplined repairs. V2 removed that free-text matcher and replaced it with recorder-issued event IDs; V1 itself and its results remain frozen.
+
 ## 4:10-4:45 — Tradeoffs and limits
 
 Show the final aggregate table:
@@ -80,7 +82,7 @@ Show the final aggregate table:
 - V2's idempotency run: 836.059s, successful with zero retries;
 - no dollar-cost result, because these were subscription-authenticated runs without API-key billing estimates.
 
-Say explicitly: the final experiment supports auditability, not higher repair rate, and the final sample contains four synthetic Django/DRF regressions.
+Say explicitly: the final experiment supports ARI structured-evidence qualification, not higher repair rate or a claim that baseline work is impossible to review, and the final sample contains four synthetic Django/DRF regressions.
 
 ## 4:45-5:00 — Close
 
