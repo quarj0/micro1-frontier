@@ -114,7 +114,6 @@ For exact artifact checks and new isolated replications, use the [reproduction g
 - [Exact reproduction guide](docs/reproduction.md)
 - [Trajectory submission index](docs/trajectory-index.md)
 - [Sanitized representative evidence bundle](submission/README.md)
-- [Five-minute demo outline](docs/demo-outline.md)
 - [Benchmark and trust-boundary design](docs/benchmark-design.md)
 - [Hackathon brief, preserved unchanged](docs/micro1%20-%20First%20Hackathon97ce7c5.pdf)
 
