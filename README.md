@@ -19,7 +19,7 @@ The patch was not the differentiator: the general-purpose agent already fixed 4/
 ## Final result
 
 | Workflow | Verified repairs | Evidence-backed repairs | Runtime | Input / cached / output / reasoning tokens | Retries |
-|---|---:|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: | ---: |
 | Baseline | 4/4 | 0/4 | 398.229s | 660,493 / 548,864 / 10,437 / 1,938 | 0 |
 | Advanced V2 | 4/4 | 4/4 | 1,186.559s | 584,132 / 434,944 / 12,339 / 3,606 | 0 |
 
@@ -51,7 +51,7 @@ The stages below must not be blended; they answer different questions.
 Three public development regressions proved the end-to-end loop: response contract drift, boolean filtering, and nested-write atomicity.
 
 | Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
-|---|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: |
 | Baseline | 3/3 | 0/3 | 327.454s | 673,681 / 568,320 / 8,610 / 1,961 |
 | Advanced V1 | 3/3 | 3/3 | 259.503s | 363,763 / 282,624 / 10,312 / 1,905 |
 
@@ -62,7 +62,7 @@ Source: [advanced-v1-development.json](benchmark/comparisons/advanced-v1-develop
 The harder four-case suite covered tenant exposure, unstable cursor pagination, query-count growth, and tenant cache contamination. The frozen baseline and V1 both repaired every case, but neither produced a qualifying evidence chain.
 
 | Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
-|---|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: |
 | Baseline | 4/4 | 0/4 | 374.252s | 610,689 / 485,888 / 10,665 / 2,806 |
 | Advanced V1 | 4/4 | 0/4 | 480.772s | 538,502 / 442,880 / 19,036 / 3,733 |
 
@@ -73,7 +73,7 @@ Source: [heldout-v1.json](benchmark/comparisons/heldout-v1.json). Classification
 V2 changed evidence transport and qualification, not the repair sequence, model, reasoning level, tools, or retry limit. On the same four hard cases, V2 preserved 4/4 repair success and raised evidence qualification from 0/4 to 4/4.
 
 | Workflow | Verified | Evidence-backed | Runtime | Input / cached / output / reasoning tokens |
-|---|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: |
 | Advanced V1 | 4/4 | 0/4 | 480.772s | 538,502 / 442,880 / 19,036 / 3,733 |
 | Advanced V2 | 4/4 | 4/4 | 372.759s | 539,143 / 426,752 / 11,851 / 3,128 |
 
