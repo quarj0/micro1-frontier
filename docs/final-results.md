@@ -20,7 +20,7 @@ The [preflight record](../benchmark/validations/final-v1-preflight.json) records
 ## Aggregate
 
 | Workflow | Cases | Verified | Evidence-backed | Runtime | Input | Cached input | Output | Reasoning | Retries |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | Baseline | 4 | 4/4 | 0/4 | 398.229s | 660,493 | 548,864 | 10,437 | 1,938 | 0 |
 | Advanced V2 | 4 | 4/4 | 4/4 | 1,186.559s | 584,132 | 434,944 | 12,339 | 3,606 | 0 |
 
@@ -29,7 +29,7 @@ Source: [final-v1.json](../benchmark/comparisons/final-v1.json). Values above ar
 ## Exact selected runs
 
 | Workflow | Case | Run ID | Verified | Evidence-backed | Runtime |
-|---|---|---|---:|---:|---:|
+| --- | --- | --- | ---: | ---: | ---: |
 | Baseline | File upload parser | `20260829T143555Z-file-upload-parser-regression-27a4bbcd` | yes | no | 116.364s |
 | Baseline | Idempotency collision | `20260829T143752Z-idempotency-key-collision-d93b525f` | yes | no | 70.168s |
 | Baseline | Project approval authorization | `20260829T143903Z-project-approval-authorization-867f97f7` | yes | no | 95.347s |
@@ -50,7 +50,7 @@ V2 used 11.6% fewer input tokens than baseline in aggregate, while output tokens
 ## Relationship to earlier stages
 
 | Stage | Comparison | Main measured result |
-|---|---|---|
+| --- | --- | --- |
 | Development | [advanced-v1-development](../benchmark/comparisons/advanced-v1-development.json) | Baseline 3/3 verified and 0/3 evidence-backed; V1 3/3 and 3/3. |
 | V1 hard-case tuning | [heldout-v1](../benchmark/comparisons/heldout-v1.json) | Baseline and V1 both 4/4 verified and 0/4 evidence-backed. |
 | V2 tuning | [advanced-v2-heldout-tuning](../benchmark/comparisons/advanced-v2-heldout-tuning.json) | V1 stayed 4/4 verified and 0/4 evidence-backed; V2 reached 4/4 and 4/4. |
