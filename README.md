@@ -2,6 +2,8 @@
 
 ARI is a benchmark and workflow for evidence-backed repair of Django REST Framework regressions.
 
+🎥 **Demo video:** [Agentic API Regression Investigator (ARI)](https://youtu.be/3DVUCpXSMbk)
+
 ## Problem / User
 
 ARI is for backend engineers who must review AI-generated API regression repairs. A passing patch is necessary, but reviewers also need a compact record of the failure reproduced, the cause inferred, and the exact executions used to verify the change.
