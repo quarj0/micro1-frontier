@@ -5,7 +5,7 @@ This directory is the intentionally committed, clone-visible subset referenced b
 ## Evidence runs
 
 | Comparison | Workflow | Run ID | Why included |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Final authorization | Baseline | `20260829T143903Z-project-approval-authorization-867f97f7` | Verified control repair without an ARI-validated structured evidence chain |
 | Final authorization | Advanced V2 | `20260829T151102Z-project-approval-authorization-26f807af` | Same final regression with recorder-issued evidence references |
 | Cross-tenant evolution | Advanced V1 | `20260829T123603Z-cross-tenant-data-exposure-d282d5bf` | Verified repair rejected by V1 free-text evidence matching |
@@ -29,7 +29,7 @@ The promoted evidence copies replace the absolute repository root with `<REPOSIT
 Original source-report SHA-256 values, as committed in the machine-generated comparisons:
 
 | Run ID | Source report SHA-256 |
-|---|---|
+| --- | --- |
 | `20260829T123603Z-cross-tenant-data-exposure-d282d5bf` | `06ab3e344fae24fc4b68bea55afc511ea92464ae2df792922150c9dbf95af6dc` |
 | `20260829T130732Z-cross-tenant-data-exposure-070153fe` | `31795bd70d5f472a37088e88f8771fb27646c62157ab1cadb6d77668c476ea3b` |
 | `20260829T143903Z-project-approval-authorization-867f97f7` | `463cec32c7dcca66c0367ace27453745f75a7f94e71a08be1a975f91fadafb24` |
